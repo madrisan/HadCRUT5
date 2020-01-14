@@ -7,9 +7,9 @@
 > &mdash; source: [HadCRUT5](https://www.metoffice.gov.uk/hadobs/hadcrut5/index.html)
 
 Datafiles that are loaded by the Python script:
- * HadCRUT.5.0.0.0.analysis.summary_series.global.annual.nc
- * HadCRUT.5.0.0.0.analysis.summary_series.northern_hemisphere.annual.nc
- * HadCRUT.5.0.0.0.analysis.summary_series.southern_hemisphere.annual.nc
+ * HadCRUT.5.0.1.0.analysis.summary_series.global.annual.nc
+ * HadCRUT.5.0.1.0.analysis.summary_series.northern_hemisphere.annual.nc
+ * HadCRUT.5.0.1.0.analysis.summary_series.southern_hemisphere.annual.nc
 
 HadCRUT5 data taken from: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/current/download.html
 
