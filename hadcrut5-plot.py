@@ -44,9 +44,12 @@ def dataset_load(dataset_filename):
 
 def main():
     datasets = {
-        "Global": "HadCRUT.5.0.0.0.analysis.summary_series.global.annual.nc",
-        "Northern Hemisphere": "HadCRUT.5.0.0.0.analysis.summary_series.northern_hemisphere.annual.nc",
-        "Southern Hemisphere": "HadCRUT.5.0.0.0.analysis.summary_series.southern_hemisphere.annual.nc" 
+        "Global":
+             "HadCRUT.5.0.0.0.analysis.summary_series.global.annual.nc",
+        "Northern Hemisphere":
+            "HadCRUT.5.0.0.0.analysis.summary_series.northern_hemisphere.annual.nc",
+        "Southern Hemisphere":
+            "HadCRUT.5.0.0.0.analysis.summary_series.southern_hemisphere.annual.nc"
     }
 
     mpl.style.use("seaborn-notebook")
@@ -64,6 +67,8 @@ def main():
     plt.xlabel("Year")
     plt.ylabel("Global Temperatures Anomaly in °C")
     plt.legend()
+    plt.axvline(x=2021, color="lightgray", label="2021", linewidth=1,
+                linestyle="dotted")
 
     plt.savefig("HadCRUT5.png", transparent=False)
 
