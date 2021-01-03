@@ -5,12 +5,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
-import json
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
-import os
 import requests
 
 __author__ = "Davide Madrisan"
@@ -41,7 +39,8 @@ def parse_args():
     examples = [
        "%(prog)s",
        "%(prog)s --outfile HadCRUT5.png",
-       "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png"]
+       "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png",
+       "%(prog)s --period \"1850-1900\" --smoother --outfile HadCRUT-1850-1900-smoother.png"]
 
     parser = argparser(descr, examples)
     parser.add_argument(
@@ -52,6 +51,10 @@ def parse_args():
         "-p", "--period",
         action="store", dest="period", default="1961-1990",
         help="show anomalies related to 1961-1990 (default) or 1850-1900")
+    parser.add_argument(
+        "-s", "--smoother",
+        action='store_true',
+        help="make the lines smoother by using 5-year means")
 
     return parser.parse_args()
 
@@ -65,9 +68,9 @@ def dataset_get(dataset_filename):
 
     try:
         with open(dataset_filename) as dataset:
-            print ("Using the local dataset file {}".format(dataset_filename))
+            print ("Using the local dataset file: {}".format(dataset_filename))
     except IOError:
-        print ("Downloading the file {}".format(dataset_filename))
+        print ("Downloading file: {}".format(dataset_filename))
         response = requests.get(url_dataset, stream=True)
         # Throw an error for bad status codes
         response.raise_for_status()
@@ -85,31 +88,58 @@ def dataset_load(dataset_filename):
 
     return (metadata, dimensions, variables)
 
-def normalize(tas_mean, period):
+def dataset_normalize(tas_mean, period):
+    """Produce the temperature means relative to the given period"""
     if period == "1961-1990":
+        # No changes required:
         # the original dataset is based on the reference period 1961-1990
         return tas_mean
 
     # The dataset starts from 1850-01-01 00:00:00
     mean_temp_1850_1900 = np.mean(tas_mean[:50])
-    print(("The mean anomaly in {0} is about {1:.8f}°C"
+    print(("The mean anomaly in {0} is about: {1:.8f}°C"
            .format(period,
                    mean_temp_1850_1900)))
-    return [round(t - mean_temp_1850_1900, 8) for t in tas_mean[:]]
+    tas_mean_normalized = [
+        round(t - mean_temp_1850_1900, 8) for t in tas_mean[:]]
 
-def plot(datasets, outfile, period):
+    print("tas_mean relative to {}: {}".format(period, tas_mean_normalized))
+    return tas_mean_normalized
+
+def dataset_smoother(years, temperatures, chunksize):
+    """Make the lines smoother by using {chunksize}-year means"""
+    years = [y for y in years if not y % chunksize]
+    temperatures = [
+        np.mean(temperatures[i*chunksize:(i+1)*chunksize]) \
+            for i in range((len(temperatures) + chunksize - 1) // chunksize )]
+
+    print("years: {}\ntemperatures: {}".format(years, temperatures))
+    return years, temperatures
+
+def plot(datasets, outfile, period, chunksize):
     mpl.style.use("seaborn-notebook")
 
     for item in datasets:
         tas_mean = datasets[item]["variables"]["tas_mean"][:]
-        tas_mean_normalized = normalize(tas_mean, period)
-        years = [y + 1850 for y in range(len(tas_mean_normalized))]
-        plt.plot(years, tas_mean_normalized, linewidth=2, markersize=12, label=item)
+        years = [y + 1850 for y in range(len(tas_mean))]
+        print("years: {}\ntemperatures: {}".format(years, tas_mean))
+
+        temperatures = dataset_normalize(tas_mean, period)
+
+        if chunksize > 1:
+            years, temperatures = dataset_smoother(years, temperatures, 5)
+            
+        plt.plot(years, temperatures, linewidth=2, markersize=12, label=item)
 
     plt.title(
-        "HadCRUT5: land and sea temperature anomalies relative to {}" .format(period))
+        "HadCRUT5: land and sea temperature anomalies relative to {}".format(period))
     plt.xlabel("Year")
-    plt.ylabel("Global Temperatures Anomaly in °C")
+
+    ylabel = "Temperature Anomalies in °C"
+    if chunksize > 1:
+        ylabel += " ({}-year averages)".format(chunksize)
+    plt.ylabel(ylabel)
+
     plt.legend()
     plt.axvline(x=2021, color="lightgray", label="2021", linewidth=1,
                 linestyle="dotted")
@@ -149,7 +179,8 @@ def main():
             "variables": variables
         })
 
-    plot(datasets, args.outfile, args.period)
+    plot(datasets,
+         args.outfile, args.period, 5 if args.smoother else 1)
 
 if __name__ == "__main__":
     main()
