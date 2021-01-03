@@ -6,6 +6,18 @@ From the [HadCRUT5](https://www.metoffice.gov.uk/hadobs/hadcrut5/index.html) sit
 > Data are available for each month from January 1850 to December 2018 (updates will be available in time), on a 5 degree grid.
 > The dataset is a collaborative product of the Met Office Hadley Centre and the Climatic Research Unit at the University of East Anglia.
 
-Datasources: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/current/download.html
+Datafiles that are loaded by the Python script:
+ * HadCRUT.5.0.0.0.analysis.summary_series.global.annual.nc
+ * HadCRUT.5.0.0.0.analysis.summary_series.northern_hemisphere.annual.nc
+ * HadCRUT.5.0.0.0.analysis.summary_series.southern_hemisphere.annual.nc
 
-![HadCRUT5 plot](HadCRUT5.png)
+HadCRUT5 data taken from: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/current/download.html
+
+## Plot of the temperature anomalies related to 1961-1990
+
+![HadCRUT5 anomalies related to 1961-1990](HadCRUT5.png)
+
+## Plot of the temperature anomalies related to 1850-1900
+
+![HadCRUT5 anomalies related to 1850-1900](HadCRUT5-1850-1900.png)
+
