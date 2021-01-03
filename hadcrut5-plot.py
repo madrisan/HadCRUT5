@@ -14,7 +14,7 @@ import requests
 
 __author__ = "Davide Madrisan"
 __copyright__ = "Copyright (C) 2020 Davide Madrisan"
-__license__ = "Apache License 2.0 (Apache-2.0)"
+__license__ = "GNU General Public License v3.0"
 __version__ = "1"
 __email__ = "davide.madrisan@gmail.com"
 __status__ = "beta"
@@ -49,10 +49,8 @@ def parse_args():
 
     return parser.parse_args()
 
-# You can dump a NetCFG file using the command:
-# $ ncdump -h <ncfile>
-
-def dataset_load(dataset_filename):
+def dataset_get(dataset_filename):
+    """Download a netCDFv4 HadCRUT5 file if not already found locally"""
     url_datasets = "https://www.metoffice.gov.uk/hadobs"
     url_dataset_hadcrut5 = (
         "{}/hadcrut5/data/current/analysis/diagnostics"
@@ -72,6 +70,8 @@ def dataset_load(dataset_filename):
             for block in response.iter_content(1024):
                 handle.write(block)
 
+def dataset_load(dataset_filename):
+    """Load the data provided by the netCDFv4 file 'dataset_filename'"""
     dataset = nc.Dataset(dataset_filename)
     metadata = dataset.__dict__
     dimensions = dataset.dimensions
@@ -103,6 +103,11 @@ def plot(datasets, outfile):
     plt.show()
 
 def main():
+    args = parse_args()
+
+    # List of the HadCRUT.5.0.0.0 datasets we want to plot.
+    # Note: We can dump a NetCFG file using the command:
+    #       $ ncdump -h <ncfile>
     datasets = {
         "Global":
              "HadCRUT.5.0.0.0.analysis.summary_series.global.annual.nc",
@@ -112,7 +117,9 @@ def main():
             "HadCRUT.5.0.0.0.analysis.summary_series.southern_hemisphere.annual.nc"
     }
 
-    args = parse_args()
+    for item in datasets:
+        dataset_get(datasets[item])
+
     plot(datasets, args.outfile)
 
 if __name__ == "__main__":
