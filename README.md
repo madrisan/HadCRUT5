@@ -31,13 +31,13 @@ It requires the Python libraries: Matplotlib, netCDF4, NumPy, and Requests.
 > &mdash; source: [HadCRUT5](https://crudata.uea.ac.uk/cru/data/temperature/#faq5)
 
 ```
-$ ./hadcrut5-plot.py --outfile HadCRUT.png
+$ ./hadcrut5-plot.py --outfile plots/HadCRUT.png
 ```
 
 ![HadCRUT5 anomalies related to 1961-1990](plots/HadCRUT5.png)
 
 ```
-$ ./hadcrut5-plot.py --smoother --outfile HadCRUT.png
+$ ./hadcrut5-plot.py --smoother --outfile plots/HadCRUT-smoother.png
 ```
 
 ![HadCRUT5 anomalies related to 1961-1990 with 5-year means](plots/HadCRUT-smoother.png)
@@ -50,13 +50,13 @@ $ ./hadcrut5-plot.py --smoother --outfile HadCRUT.png
 >
 > &mdash; source: [Climate Lab Book](https://www.climate-lab-book.ac.uk/2017/defining-pre-industrial/)
 ```
-$ ./hadcrut5-plot.py --period "1850-1900" --outfile HadCRUT-1850-1900.png
+$ ./hadcrut5-plot.py --period "1850-1900" --outfile plots/HadCRUT-1850-1900.png
 ```
 
 ![HadCRUT5 anomalies related to 1850-1900](plots/HadCRUT5-1850-1900.png)
 
 ```
-$ ./hadcrut5-plot.py --period "1850-1900" --smoother --outfile HadCRUT-1850-1900-smoother.png
+$ ./hadcrut5-plot.py --period "1850-1900" --smoother --outfile plots/HadCRUT-1850-1900-smoother.png
 ```
 
 ![HadCRUT5 anomalies related to 1850-1900 with 5-year means](plots/HadCRUT-1850-1900-smoother.png)
