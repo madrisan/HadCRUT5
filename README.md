@@ -34,7 +34,13 @@ It requires the Python libraries: Matplotlib, netCDF4, NumPy, and Requests.
 $ ./hadcrut5-plot.py --outfile HadCRUT.png
 ```
 
-![HadCRUT5 anomalies related to 1961-1990](HadCRUT5.png)
+![HadCRUT5 anomalies related to 1961-1990](plots/HadCRUT5.png)
+
+```
+$ ./hadcrut5-plot.py --smoother --outfile HadCRUT.png
+```
+
+![HadCRUT5 anomalies related to 1961-1990 with 5-year means](plots/HadCRUT-smoother.png)
 
 ### Related to 1850-1900
 
@@ -47,13 +53,10 @@ $ ./hadcrut5-plot.py --outfile HadCRUT.png
 $ ./hadcrut5-plot.py --period "1850-1900" --outfile HadCRUT-1850-1900.png
 ```
 
-![HadCRUT5 anomalies related to 1850-1900](HadCRUT5-1850-1900.png)
+![HadCRUT5 anomalies related to 1850-1900](plots/HadCRUT5-1850-1900.png)
 
-### Related to 1850-1900 (smoothed version)
-
-A plot using 5-year means.
 ```
 $ ./hadcrut5-plot.py --period "1850-1900" --smoother --outfile HadCRUT-1850-1900-smoother.png
 ```
 
-![HadCRUT5 anomalies related to 1850-1900 smoothed](HadCRUT-1850-1900-smoother.png)
+![HadCRUT5 anomalies related to 1850-1900 with 5-year means](plots/HadCRUT-1850-1900-smoother.png)
