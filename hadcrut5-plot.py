@@ -136,7 +136,7 @@ def plot(datasets, outfile, period, chunksize):
         upper, _ = dataset_normalize(tas_upper, period, norm_temp)
 
         if chunksize > 1:
-            years, means = dataset_smoother(years, means, 5)
+            years, mean = dataset_smoother(years, mean, 5)
         else:
             plt.fill_between(years, lower, upper, color="lightgray")
         plt.plot(years, mean, linewidth=2, markersize=12, label=item)
