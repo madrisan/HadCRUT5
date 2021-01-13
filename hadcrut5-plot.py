@@ -14,7 +14,7 @@ import requests
 __author__ = "Davide Madrisan"
 __copyright__ = "Copyright (C) 2020 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
-__version__ = "1"
+__version__ = "2"
 __email__ = "davide.madrisan@gmail.com"
 __status__ = "beta"
 
@@ -88,23 +88,27 @@ def dataset_load(dataset_filename):
 
     return (metadata, dimensions, variables)
 
-def dataset_normalize(tas_mean, period):
-    """Produce the temperature means relative to the given period"""
+def dataset_normalize(tas_mean, period, norm_temp=None):
+    """
+    Produce the temperature means relative to the given period
+    If the norm_temp is not set it's calculated according to the given period.
+    Otherwise this value is used as normalization factor.
+    """
     if period == "1961-1990":
         # No changes required:
         # the original dataset is based on the reference period 1961-1990
-        return tas_mean
+        return (tas_mean, norm_temp)
 
-    # The dataset starts from 1850-01-01 00:00:00
-    mean_temp_1850_1900 = np.mean(tas_mean[:50])
-    print(("The mean anomaly in {0} is about: {1:.8f}°C"
-           .format(period,
-                   mean_temp_1850_1900)))
+    if not norm_temp:
+        # The dataset starts from 1850-01-01 00:00:00
+        norm_temp = np.mean(tas_mean[:50])
+        print(("The mean anomaly in {0} is about: {1:.8f}°C"
+               .format(period, norm_temp)))
+
     tas_mean_normalized = [
-        round(t - mean_temp_1850_1900, 8) for t in tas_mean[:]]
-
+        round(t - norm_temp, 8) for t in tas_mean[:]]
     print("tas_mean relative to {}: {}".format(period, tas_mean_normalized))
-    return tas_mean_normalized
+    return tas_mean_normalized, norm_temp
 
 def dataset_smoother(years, temperatures, chunksize):
     """Make the lines smoother by using {chunksize}-year means"""
@@ -121,15 +125,21 @@ def plot(datasets, outfile, period, chunksize):
 
     for item in datasets:
         tas_mean = datasets[item]["variables"]["tas_mean"][:]
+        tas_lower = datasets[item]["variables"]["tas_lower"][:]
+        tas_upper = datasets[item]["variables"]["tas_upper"][:]
+
         years = [y + 1850 for y in range(len(tas_mean))]
         print("years: {}\ntemperatures: {}".format(years, tas_mean))
 
-        temperatures = dataset_normalize(tas_mean, period)
+        mean, norm_temp = dataset_normalize(tas_mean, period)
+        lower, _ = dataset_normalize(tas_lower, period, norm_temp)
+        upper, _ = dataset_normalize(tas_upper, period, norm_temp)
 
         if chunksize > 1:
-            years, temperatures = dataset_smoother(years, temperatures, 5)
-            
-        plt.plot(years, temperatures, linewidth=2, markersize=12, label=item)
+            years, means = dataset_smoother(years, means, 5)
+        else:
+            plt.fill_between(years, lower, upper, color="lightgray")
+        plt.plot(years, mean, linewidth=2, markersize=12, label=item)
 
     plt.title(
         "HadCRUT5: land and sea temperature anomalies relative to {}".format(period))
