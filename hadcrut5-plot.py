@@ -156,6 +156,9 @@ def plot(datasets, outfile, period, chunksize):
             plt.fill_between(years, lower, upper, color="lightgray")
         plt.plot(years, mean, linewidth=2, markersize=12, label=item)
 
+    plt.hlines(0, np.min(years), np.max(years),
+               colors='gray', linestyles='dotted')
+
     plt.title(
         "HadCRUT5: land and sea temperature anomalies relative to {}".format(period))
     plt.xlabel("Year")
