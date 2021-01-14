@@ -169,8 +169,6 @@ def plot(datasets, outfile, period, chunksize):
     plt.ylabel(ylabel)
 
     plt.legend()
-    plt.axvline(x=2021, color="lightgray", label="2021", linewidth=1,
-                linestyle="dotted")
 
     if outfile:
         plt.savefig(outfile, transparent=False)
