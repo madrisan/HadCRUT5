@@ -116,8 +116,14 @@ def dataset_normalize(tas_mean, period, norm_temp=None):
         return (tas_mean, norm_temp)
 
     if not norm_temp:
-        # The dataset starts from 1850-01-01 00:00:00
-        norm_temp = np.mean(tas_mean[:50])
+        if period == "1850-1900":
+            # The dataset starts from 1850-01-01 00:00:00
+            norm_temp = np.mean(tas_mean[:50])
+        elif period == "1880-1920":
+            norm_temp = np.mean(tas_mean[30:41])
+        else:
+            raise Exception("Unsupported period \"{}\"".format(period))
+
         print(("The mean anomaly in {0} is about: {1:.8f}°C"
                .format(period, norm_temp)))
 
@@ -153,6 +159,7 @@ def plot(datasets, outfile, period, chunksize):
 
         if chunksize > 1:
             years, mean = dataset_smoother(years, mean, 5)
+            print("delta ({}): {}".format(years[-1], mean[-1]))
         else:
             plt.fill_between(years, lower, upper, color="lightgray")
         plt.plot(years, mean, linewidth=2, markersize=12, label=item)
