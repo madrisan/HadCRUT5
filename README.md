@@ -60,3 +60,21 @@ $ ./hadcrut5-plot.py --period "1850-1900" --smoother --outfile plots/HadCRUT5-18
 ```
 
 ![HadCRUT5 anomalies related to 1850-1900 with 5-year means](plots/HadCRUT5-1850-1900-smoother.png)
+
+### Related to 1880-1920
+
+Global temperature in the 1880-1920 base period is
+[for someones](https://mailchi.mp/9fc4a88a5c69/global-temperature-in-2020?e=a838466c17)
+a reasonable estimate of *pre-industrial* temperatures.
+
+```
+$ ./hadcrut5-plot.py --period "1880-1920" --outfile plots/HadCRUT5-1880-1920.png
+```
+
+![HadCRUT5 anomalies related to 1880-1920](plots/HadCRUT5-1880-1920.png)
+
+```
+$ ./hadcrut5-plot.py --period "1880-1920" --smoother --outfile plots/HadCRUT5-1880-1920-smoother.png
+```
+
+![HadCRUT5 anomalies related to 1880-1920 with 5-year means](plots/HadCRUT5-1880-1920-smoother.png)

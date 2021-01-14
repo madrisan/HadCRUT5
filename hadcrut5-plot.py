@@ -12,7 +12,7 @@ import numpy as np
 import requests
 
 __author__ = "Davide Madrisan"
-__copyright__ = "Copyright (C) 2020 Davide Madrisan"
+__copyright__ = "Copyright (C) 2020-2021 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
 __version__ = "2"
 __email__ = "davide.madrisan@gmail.com"
@@ -41,6 +41,7 @@ def parse_args():
        "%(prog)s --global",
        "%(prog)s --outfile HadCRUT5.png",
        "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png",
+       "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png",
        "%(prog)s --period \"1850-1900\" --smoother --outfile HadCRUT-1850-1900-smoother.png"]
 
     parser = argparser(descr, examples)
@@ -51,7 +52,7 @@ def parse_args():
     parser.add_argument(
         "-p", "--period",
         action="store", dest="period", default="1961-1990",
-        help="show anomalies related to 1961-1990 (default) or 1850-1900")
+        help="show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920")
     parser.add_argument(
         "-m", "--smoother",
         action="store_true",
@@ -177,7 +178,7 @@ def plot(datasets, outfile, period, chunksize):
 
 def main():
     args = parse_args()
-    if args.period not in ["1850-1900", "1961-1990"]:
+    if args.period not in ["1850-1900", "1880-1920", "1961-1990"]:
         raise Exception("Unsupported reference period: {}".format(args.period))
 
     if args.global_temps or args.northern_temps or args.southern_temps:
