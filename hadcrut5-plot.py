@@ -38,6 +38,7 @@ def parse_args():
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
        "%(prog)s",
+       "%(prog)s --global",
        "%(prog)s --outfile HadCRUT5.png",
        "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png",
        "%(prog)s --period \"1850-1900\" --smoother --outfile HadCRUT-1850-1900-smoother.png"]
@@ -52,10 +53,24 @@ def parse_args():
         action="store", dest="period", default="1961-1990",
         help="show anomalies related to 1961-1990 (default) or 1850-1900")
     parser.add_argument(
-        "-s", "--smoother",
-        action='store_true',
+        "-m", "--smoother",
+        action="store_true",
         help="make the lines smoother by using 5-year means")
-
+    parser.add_argument(
+        "-g", "--global",
+        action="store_true",
+        dest="global_temps",
+        help="plot the Global Temperatures")
+    parser.add_argument(
+        "-n", "--northern",
+        action="store_true",
+        dest="northern_temps",
+        help="Northern Hemisphere Temperatures")
+    parser.add_argument(
+        "-s", "--southern",
+        action='store_true',
+        dest="southern_temps",
+        help="Southern Hemisphere Temperatures")
     return parser.parse_args()
 
 def dataset_get(dataset_filename):
@@ -164,20 +179,29 @@ def main():
     if args.period not in ["1850-1900", "1961-1990"]:
         raise Exception("Unsupported reference period: {}".format(args.period))
 
+    if args.global_temps or args.northern_temps or args.southern_temps:
+        global_temps = args.global_temps
+        northern_temps = args.northern_temps
+        southern_temps = args.southern_temps
+    else:
+        global_temps = northern_temps = southern_temps = True
+
     # List of the HadCRUT.5.0.0.0 datasets we want to plot.
     # Note: We can dump a NetCFG file using the command:
     #       $ ncdump -h <ncfile>
-    datasets = {
-        "Global": {
+    datasets = {}
+    if global_temps:
+        datasets["Global"] = {
             "filename": "HadCRUT.5.0.0.0.analysis.summary_series.global.annual.nc"
-        },
-        "Northern Hemisphere": {
+        }
+    if northern_temps:
+        datasets["Northern Hemisphere"] = {
             "filename": "HadCRUT.5.0.0.0.analysis.summary_series.northern_hemisphere.annual.nc"
-        },
-        "Southern Hemisphere": {
+        }
+    if southern_temps:
+        datasets["Southern Hemisphere"] = {
             "filename": "HadCRUT.5.0.0.0.analysis.summary_series.southern_hemisphere.annual.nc"
         }
-    }
 
     for item in datasets:
         datafile = datasets[item]["filename"]
