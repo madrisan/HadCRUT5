@@ -195,15 +195,15 @@ def main():
     datasets = {}
     if global_temps:
         datasets["Global"] = {
-            "filename": "HadCRUT.5.0.0.0.analysis.summary_series.global.annual.nc"
+            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.global.annual.nc"
         }
     if northern_temps:
         datasets["Northern Hemisphere"] = {
-            "filename": "HadCRUT.5.0.0.0.analysis.summary_series.northern_hemisphere.annual.nc"
+            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.northern_hemisphere.annual.nc"
         }
     if southern_temps:
         datasets["Southern Hemisphere"] = {
-            "filename": "HadCRUT.5.0.0.0.analysis.summary_series.southern_hemisphere.annual.nc"
+            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.southern_hemisphere.annual.nc"
         }
 
     for item in datasets:
