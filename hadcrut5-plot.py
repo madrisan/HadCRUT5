@@ -113,7 +113,7 @@ def dataset_normalize(tas_mean, period, norm_temp=None):
     if period == "1961-1990":
         # No changes required:
         # the original dataset is based on the reference period 1961-1990
-        return (tas_mean, norm_temp)
+        return (tas_mean, 0)
 
     if not norm_temp:
         if period == "1850-1900":
@@ -132,6 +132,10 @@ def dataset_normalize(tas_mean, period, norm_temp=None):
     print("tas_mean relative to {}: {}".format(period, tas_mean_normalized))
     return tas_mean_normalized, norm_temp
 
+def dataset_anomaly(temperatures):
+    """Return the maximum anomaly with respect to 'base_temp'"""
+    return np.max([t for t in temperatures])
+
 def dataset_smoother(years, temperatures, chunksize):
     """Make the lines smoother by using {chunksize}-year means"""
     years = [y for y in years if not y % chunksize]
@@ -144,6 +148,7 @@ def dataset_smoother(years, temperatures, chunksize):
 
 def plot(datasets, outfile, period, chunksize):
     mpl.style.use("seaborn-notebook")
+    anomaly = None
 
     for item in datasets:
         tas_mean = datasets[item]["variables"]["tas_mean"][:]
@@ -154,6 +159,11 @@ def plot(datasets, outfile, period, chunksize):
         print("years: {}\ntemperatures: {}".format(years, tas_mean))
 
         mean, norm_temp = dataset_normalize(tas_mean, period)
+
+        if item == "Global":
+            anomaly = dataset_anomaly(mean)
+            print("Max anomaly for Global dataset: {}".format(anomaly))
+
         lower, _ = dataset_normalize(tas_lower, period, norm_temp)
         upper, _ = dataset_normalize(tas_upper, period, norm_temp)
 
@@ -175,6 +185,20 @@ def plot(datasets, outfile, period, chunksize):
     if chunksize > 1:
         ylabel += " ({}-year averages)".format(chunksize)
     plt.ylabel(ylabel)
+
+    if anomaly:
+        ax = plt.gca()
+        plt.annotate("max anomaly: {0:+.2f}°C".format(anomaly),
+                     xy=(0.96, 0.04),
+                     xycoords="axes fraction",
+                     fontsize=9,
+                     horizontalalignment="right",
+                     verticalalignment="bottom",
+                     bbox={
+                         "facecolor": "{}".format("blue" if anomaly <= 0 else "red"),
+                         "alpha": 0.3,
+                         "pad": 5
+                     })
 
     plt.legend()
 
