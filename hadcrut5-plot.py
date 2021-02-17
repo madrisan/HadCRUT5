@@ -42,7 +42,7 @@ def parse_args():
        "%(prog)s --outfile HadCRUT5.png",
        "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png",
        "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png",
-       "%(prog)s --period \"1850-1900\" --smoother --outfile HadCRUT-1850-1900-smoother.png"]
+       "%(prog)s --period \"1850-1900\" --smoother 5 --outfile HadCRUT-1850-1900-smoother.png"]
 
     parser = argparser(descr, examples)
     parser.add_argument(
@@ -55,8 +55,8 @@ def parse_args():
         help="show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920")
     parser.add_argument(
         "-m", "--smoother",
-        action="store_true",
-        help="make the lines smoother by using 5-year means")
+        action="store", dest="smoother",
+        help="make the lines smoother by using N-year means")
     parser.add_argument(
         "-g", "--global",
         action="store_true",
@@ -168,7 +168,7 @@ def plot(datasets, outfile, period, chunksize):
         upper, _ = dataset_normalize(tas_upper, period, norm_temp)
 
         if chunksize > 1:
-            years, mean = dataset_smoother(years, mean, 5)
+            years, mean = dataset_smoother(years, mean, chunksize)
             print("delta ({}): {}".format(years[-1], mean[-1]))
         else:
             plt.fill_between(years, lower, upper, color="lightgray")
@@ -247,7 +247,7 @@ def main():
         })
 
     plot(datasets,
-         args.outfile, args.period, 5 if args.smoother else 1)
+         args.outfile, args.period, int(args.smoother) if args.smoother else 1)
 
 if __name__ == "__main__":
     main()
