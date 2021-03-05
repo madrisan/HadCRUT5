@@ -46,6 +46,7 @@ optional arguments:
   -g, --global          plot the Global Temperatures
   -n, --northern        Northern Hemisphere Temperatures
   -s, --southern        Southern Hemisphere Temperatures
+  -v, --verbose         make the operation more talkative
 
 examples:
   hadcrut5-plot.py
