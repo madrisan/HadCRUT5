@@ -21,10 +21,9 @@ __status__ = "beta"
 def copyleft(descr):
     """Print the Copyright message and License """
     return ("{} v.{} ({})\n{} <{}>\nLicense: {}"
-            .format(
-                descr, __version__, __status__,
-                __copyright__, __email__,
-                __license__))
+            .format(descr, __version__, __status__,
+                    __copyright__, __email__,
+                    __license__))
 
 def argparser(descr, examples):
     """Return a new ArgumentParser object """
@@ -72,9 +71,15 @@ def parse_args():
         action='store_true',
         dest="southern_temps",
         help="Southern Hemisphere Temperatures")
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        dest="verbose",
+        help="make the operation more talkative")
+
     return parser.parse_args()
 
-def dataset_get(dataset_filename):
+def dataset_get(dataset_filename, verbose):
     """Download a netCDFv4 HadCRUT5 file if not already found locally"""
     url_datasets = "https://www.metoffice.gov.uk/hadobs"
     url_dataset_hadcrut5 = (
@@ -84,9 +89,13 @@ def dataset_get(dataset_filename):
 
     try:
         with open(dataset_filename) as dataset:
-            print ("Using the local dataset file: {}".format(dataset_filename))
+            if verbose:
+                print(("Using the local dataset file: {}"
+                       .format(dataset_filename)))
     except IOError:
-        print ("Downloading file: {}".format(dataset_filename))
+        if verbose:
+            print ("Downloading {} ...".format(dataset_filename))
+
         response = requests.get(url_dataset, stream=True)
         # Throw an error for bad status codes
         response.raise_for_status()
@@ -102,7 +111,11 @@ def dataset_load(dataset_filename):
     dimensions = dataset.dimensions
     variables = dataset.variables
 
-    return (metadata, dimensions, variables)
+    return {
+        "dimensions": dimensions,
+        "metadata"  : metadata,
+        "variables" : variables
+    }
 
 def dataset_normalize(tas_mean, period, norm_temp=None):
     """
@@ -124,12 +137,9 @@ def dataset_normalize(tas_mean, period, norm_temp=None):
         else:
             raise Exception("Unsupported period \"{}\"".format(period))
 
-        print(("The mean anomaly in {0} is about: {1:.8f}°C"
-               .format(period, norm_temp)))
-
     tas_mean_normalized = [
         round(t - norm_temp, 8) for t in tas_mean[:]]
-    print("tas_mean relative to {}: {}".format(period, tas_mean_normalized))
+
     return tas_mean_normalized, norm_temp
 
 def dataset_anomaly(temperatures):
@@ -141,37 +151,48 @@ def dataset_smoother(years, temperatures, chunksize):
     years = [y for y in years if not y % chunksize]
     temperatures = [
         np.mean(temperatures[i*chunksize:(i+1)*chunksize]) \
-            for i in range((len(temperatures) + chunksize - 1) // chunksize )]
+            for i in range((len(temperatures) + chunksize - 1) // chunksize )
+    ]
 
-    print("years: {}\ntemperatures: {}".format(years, temperatures))
     return years, temperatures
 
-def plot(datasets, outfile, period, chunksize):
+def plot(datasets, outfile, period, chunksize, verbose):
     mpl.style.use("seaborn-notebook")
     anomaly = None
 
     for item in datasets:
-        tas_mean = datasets[item]["variables"]["tas_mean"][:]
+        tas_mean  = datasets[item]["variables"]["tas_mean"][:]
         tas_lower = datasets[item]["variables"]["tas_lower"][:]
         tas_upper = datasets[item]["variables"]["tas_upper"][:]
 
         years = [y + 1850 for y in range(len(tas_mean))]
-        print("years: {}\ntemperatures: {}".format(years, tas_mean))
+        if verbose:
+            print("years: \\\n{}".format(np.array(years)))
+            print("temperatures: \\\n{}".format(tas_mean))
 
         mean, norm_temp = dataset_normalize(tas_mean, period)
+        if verbose:
+            print(("The mean anomaly in {0} is about: {1:.8f}°C"
+                   .format(period, norm_temp)))
+            print("tas_mean relative to {}: \\\n{}".format(period, np.array(mean)))
 
         if item == "Global":
             anomaly = dataset_anomaly(mean)
-            print("Max anomaly for Global dataset: {}".format(anomaly))
+            if verbose:
+                print("Max anomaly for Global dataset: {}".format(anomaly))
 
         lower, _ = dataset_normalize(tas_lower, period, norm_temp)
         upper, _ = dataset_normalize(tas_upper, period, norm_temp)
 
         if chunksize > 1:
             years, mean = dataset_smoother(years, mean, chunksize)
-            print("delta ({}): {}".format(years[-1], mean[-1]))
+            if verbose:
+                print("years: \\\n{}".format(np.array(years)))
+                print("temperatures: \\\n{}".format(mean))
+                print("delta ({}): \\\n{}".format(years[-1], mean[-1]))
         else:
             plt.fill_between(years, lower, upper, color="lightgray")
+
         plt.plot(years, mean, linewidth=2, markersize=12, label=item)
 
     plt.hlines(0, np.min(years), np.max(years),
@@ -238,16 +259,15 @@ def main():
 
     for item in datasets:
         datafile = datasets[item]["filename"]
-        dataset_get(datafile)
-        metadata, dimensions, variables = dataset_load(datafile)
-        datasets[item].update({
-            "metadata": metadata,
-            "dimensions": dimensions,
-            "variables": variables
-        })
+        dataset_get(datafile, args.verbose)
+        data = dataset_load(datafile)
+        datasets[item].update(data)
 
     plot(datasets,
-         args.outfile, args.period, int(args.smoother) if args.smoother else 1)
+         args.outfile,
+         args.period,
+         int(args.smoother) if args.smoother else 1,
+         args.verbose)
 
 if __name__ == "__main__":
     main()
