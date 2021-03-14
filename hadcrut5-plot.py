@@ -11,26 +11,7 @@ import netCDF4 as nc
 import numpy as np
 import requests
 
-__author__ = "Davide Madrisan"
-__copyright__ = "Copyright (C) 2020-2021 Davide Madrisan"
-__license__ = "GNU General Public License v3.0"
-__version__ = "2"
-__email__ = "davide.madrisan@gmail.com"
-__status__ = "beta"
-
-def copyleft(descr):
-    """Print the Copyright message and License """
-    return ("{} v.{} ({})\n{} <{}>\nLicense: {}"
-            .format(descr, __version__, __status__,
-                    __copyright__, __email__,
-                    __license__))
-
-def argparser(descr, examples):
-    """Return a new ArgumentParser object """
-    return argparse.ArgumentParser(
-               formatter_class = argparse.RawDescriptionHelpFormatter,
-               description = copyleft(descr),
-               epilog = "examples:\n  " + "\n  ".join(examples))
+import hadcrut5lib as hadcrut5
 
 def parse_args():
     """This function parses and return arguments passed in """
@@ -43,7 +24,7 @@ def parse_args():
        "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png",
        "%(prog)s --period \"1850-1900\" --smoother 5 --outfile HadCRUT-1850-1900-smoother.png"]
 
-    parser = argparser(descr, examples)
+    parser = hadcrut5.argparser(descr, examples)
     parser.add_argument(
         "-f", "--outfile",
         action="store", dest="outfile",
@@ -79,84 +60,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def dataset_get(dataset_filename, verbose):
-    """Download a netCDFv4 HadCRUT5 file if not already found locally"""
-    url_datasets = "https://www.metoffice.gov.uk/hadobs"
-    url_dataset_hadcrut5 = (
-        "{}/hadcrut5/data/current/analysis/diagnostics"
-        .format(url_datasets))
-    url_dataset = "{}/{}".format(url_dataset_hadcrut5, dataset_filename)
-
-    try:
-        with open(dataset_filename) as dataset:
-            if verbose:
-                print(("Using the local dataset file: {}"
-                       .format(dataset_filename)))
-    except IOError:
-        if verbose:
-            print ("Downloading {} ...".format(dataset_filename))
-
-        response = requests.get(url_dataset, stream=True)
-        # Throw an error for bad status codes
-        response.raise_for_status()
-
-        with open(dataset_filename, 'wb') as handle:
-            for block in response.iter_content(1024):
-                handle.write(block)
-
-def dataset_load(dataset_filename):
-    """Load the data provided by the netCDFv4 file 'dataset_filename'"""
-    dataset = nc.Dataset(dataset_filename)
-    metadata = dataset.__dict__
-    dimensions = dataset.dimensions
-    variables = dataset.variables
-
-    return {
-        "dimensions": dimensions,
-        "metadata"  : metadata,
-        "variables" : variables
-    }
-
-def dataset_normalize(tas_mean, period, norm_temp=None):
-    """
-    Produce the temperature means relative to the given period
-    If the norm_temp is not set it's calculated according to the given period.
-    Otherwise this value is used as normalization factor.
-    """
-    if period == "1961-1990":
-        # No changes required:
-        # the original dataset is based on the reference period 1961-1990
-        return (tas_mean, 0)
-
-    if not norm_temp:
-        if period == "1850-1900":
-            # The dataset starts from 1850-01-01 00:00:00
-            norm_temp = np.mean(tas_mean[:50])
-        elif period == "1880-1920":
-            norm_temp = np.mean(tas_mean[30:41])
-        else:
-            raise Exception("Unsupported period \"{}\"".format(period))
-
-    tas_mean_normalized = [
-        round(t - norm_temp, 8) for t in tas_mean[:]]
-
-    return tas_mean_normalized, norm_temp
-
-def dataset_anomaly(temperatures):
-    """Return the maximum anomaly with respect to 'base_temp'"""
-    return np.max([t for t in temperatures])
-
-def dataset_smoother(years, temperatures, chunksize):
-    """Make the lines smoother by using {chunksize}-year means"""
-    years = [y for y in years if not y % chunksize]
-    temperatures = [
-        np.mean(temperatures[i*chunksize:(i+1)*chunksize]) \
-            for i in range((len(temperatures) + chunksize - 1) // chunksize )
-    ]
-
-    return years, temperatures
-
-def plot(datasets, outfile, period, chunksize, verbose):
+def plotline(datasets, outfile, period, chunksize, verbose):
     mpl.style.use("seaborn-notebook")
     anomaly = None
 
@@ -170,22 +74,22 @@ def plot(datasets, outfile, period, chunksize, verbose):
             print("years: \\\n{}".format(np.array(years)))
             print("temperatures: \\\n{}".format(tas_mean))
 
-        mean, norm_temp = dataset_normalize(tas_mean, period)
+        mean, norm_temp = hadcrut5.dataset_normalize(tas_mean, period)
         if verbose:
             print(("The mean anomaly in {0} is about: {1:.8f}°C"
                    .format(period, norm_temp)))
             print("tas_mean relative to {}: \\\n{}".format(period, np.array(mean)))
 
         if item == "Global":
-            anomaly = dataset_anomaly(mean)
+            anomaly = hadcrut5.dataset_anomaly(mean)
             if verbose:
                 print("Max anomaly for Global dataset: {}".format(anomaly))
 
-        lower, _ = dataset_normalize(tas_lower, period, norm_temp)
-        upper, _ = dataset_normalize(tas_upper, period, norm_temp)
+        lower, _ = hadcrut5.dataset_normalize(tas_lower, period, norm_temp)
+        upper, _ = hadcrut5.dataset_normalize(tas_upper, period, norm_temp)
 
         if chunksize > 1:
-            years, mean = dataset_smoother(years, mean, chunksize)
+            years, mean = hadcrut5.dataset_smoother(years, mean, chunksize)
             if verbose:
                 print("years: \\\n{}".format(np.array(years)))
                 print("temperatures: \\\n{}".format(mean))
@@ -240,34 +144,21 @@ def main():
     else:
         global_temps = northern_temps = southern_temps = True
 
-    # List of the HadCRUT.5.0.0.0 datasets we want to plot.
-    # Note: We can dump a NetCFG file using the command:
-    #       $ ncdump -h <ncfile>
-    datasets = {}
-    if global_temps:
-        datasets["Global"] = {
-            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.global.annual.nc"
-        }
-    if northern_temps:
-        datasets["Northern Hemisphere"] = {
-            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.northern_hemisphere.annual.nc"
-        }
-    if southern_temps:
-        datasets["Southern Hemisphere"] = {
-            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.southern_hemisphere.annual.nc"
-        }
+    datasets = hadcrut5.dataset_set(global_temps,
+                                    northern_temps,
+                                    southern_temps)
 
     for item in datasets:
         datafile = datasets[item]["filename"]
-        dataset_get(datafile, args.verbose)
-        data = dataset_load(datafile)
+        hadcrut5.dataset_get(datafile, args.verbose)
+        data = hadcrut5.dataset_load(datafile)
         datasets[item].update(data)
 
-    plot(datasets,
-         args.outfile,
-         args.period,
-         int(args.smoother) if args.smoother else 1,
-         args.verbose)
+    plotline(datasets,
+             args.outfile,
+             args.period,
+             int(args.smoother) if args.smoother else 1,
+             args.verbose)
 
 if __name__ == "__main__":
     main()
