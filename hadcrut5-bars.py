@@ -19,9 +19,9 @@ def parse_args():
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
        "%(prog)s",
-       "%(prog)s --outfile HadCRUT5.png",
-       "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png",
-       "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png"]
+       "%(prog)s --outfile HadCRUT5-global.png",
+       "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-global-1850-1900.png",
+       "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-global-1880-1920.png"]
 
     parser = hadcrut5.argparser(descr, examples)
     parser.add_argument(
@@ -40,9 +40,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def plotbar(datasets, outfile, period, verbose):
-    plt.style.use('dark_background')
-    ax = plt.subplot(111)
+def plotbar(dataset, outfile, period, verbose):
     bar_width = 0.7
 
     negative = [
@@ -60,64 +58,73 @@ def plotbar(datasets, outfile, period, verbose):
         "#ad0513", "#940511", "#7c040e"
     ]
 
-    fontxl = {
+    basefont = {
         'family': 'DejaVu Sans',
         'color' : 'white',
         'weight': 'bold',
-        'size'  : 16
     }
-    fontxs = {
-        'family': 'DejaVu Sans',
-        'color' : 'white',
-        'weight': 'normal',
-        'size'  : 10
-    }
+    fontxl = { **basefont, "size": 16 }
+    fontxs = { **basefont, "size": 10 }
 
-    for itemnum, item in enumerate(datasets):
-        tas_mean = datasets[item]["variables"]["tas_mean"][:]
+    plt.style.use("dark_background")
+    ax = plt.subplot(111)
 
-        years = [y + 1850 for y in range(len(tas_mean))]
-        if verbose:
-            print("years: \\\n{}".format(np.array(years)))
-            print("temperatures: \\\n{}".format(tas_mean))
+    tas_mean = dataset["variables"]["tas_mean"][:]
+    years = [y + 1850 for y in range(len(tas_mean))]
+    if verbose:
+        print("years: \\\n{}".format(np.array(years)))
+        print("temperatures: \\\n{}".format(tas_mean))
 
-        mean, norm_temp = hadcrut5.dataset_normalize(tas_mean, period)
-        if verbose:
-            print(("The mean anomaly in {0} is about: {1:.8f}°C"
-                   .format(period, norm_temp)))
-            print(("tas_mean relative to {}: \\\n{}"
-                   .format(period, np.array(mean))))
+    mean, norm_temp = hadcrut5.dataset_normalize(tas_mean, period)
+    if verbose:
+        print(("The mean anomaly in {0} is about: {1:.8f}°C"
+               .format(period, norm_temp)))
+        print(("tas_mean relative to {}: \\\n{}"
+               .format(period, np.array(mean))))
 
-        color_deep = lambda x: math.floor(math.fabs(x * 10))
-        get_color = lambda x: positive[color_deep(x)] if x > 0 else negative[color_deep(x)]
-        colors = [get_color(i) for i in mean]
 
-        ax.bar(years,
-               mean,
-               width=bar_width,
-               color=colors,
-               alpha=0.6,
-               align='center')
+    color_deep = lambda x: math.floor(math.fabs(x * 10))
+    get_color = lambda x: positive[color_deep(x)] if x > 0 else negative[color_deep(x)]
+    colors = [get_color(i) for i in mean]
 
-    if outfile:
-        plt.savefig(outfile, transparent=False)
+    ax.bar(years,
+           mean,
+           width=bar_width,
+           color=colors,
+           alpha=0.6,
+           align="center")
 
-    #plt.axis('off')
+    ax.axes.get_xaxis().set_visible(False)
     ax.yaxis.set_label_position("right")
     ax.yaxis.tick_right()
-    ax.set(xticklabels=[])
-    ax.axes.get_xaxis().set_visible(False)
 
-    plt.text(1850, 1.20, 'Global average temperature difference *',
-             fontdict=fontxl)
-    plt.text(1850, 1.10, "1850-2021",
-            fontdict=fontxl)
-    plt.text(1850, 0.95, "* Compared to {} pre-industrial levels".format(period),
-             fontdict=fontxs)
-    plt.text(1850, 0.90, "Data source - HadCRUT5",
-             fontdict=fontxs)
-    #plt.tick_params(labelbottom=True)
-    plt.tight_layout()
+    upper, left = .95, .025
+    last_year = years[-1]
+
+    text_props = dict(horizontalalignment="left",
+                      verticalalignment="top",
+                      transform=ax.transAxes)
+    plt.text(left, upper,
+             '\n'.join((
+                 r"Global average temperature difference *",
+                 r"1850-{}".format(last_year))),
+             fontdict=fontxl,
+             linespacing=1.2,
+             **text_props)
+    plt.text(left, upper - .125,
+             '\n'.join((
+                 r"(*) Compared to {} pre-industrial levels".format(period),
+                 r"Data source - HadCRUT5")),
+             fontdict=fontxs,
+             linespacing=1.5,
+             **text_props)
+
+    fig = plt.gcf()
+    fig.set_size_inches(10, 8)   # 1 inch equal to 80pt
+
+    if outfile:
+        fig.savefig(outfile, dpi=80)
+
     plt.show()
 
 def main():
@@ -127,14 +134,14 @@ def main():
                          .format(args.period)))
 
     datasets = hadcrut5.dataset_set(True, False, False)
+    global_dataset = datasets["Global"]
 
-    for item in datasets:
-        datafile = datasets[item]["filename"]
-        hadcrut5.dataset_get(datafile, args.verbose)
-        data = hadcrut5.dataset_load(datafile)
-        datasets[item].update(data)
+    datafile = global_dataset["filename"]
+    hadcrut5.dataset_get(datafile, args.verbose)
+    data = hadcrut5.dataset_load(datafile)
+    global_dataset.update(data)
 
-    plotbar(datasets,
+    plotbar(global_dataset,
             args.outfile,
             args.period,
             args.verbose)
