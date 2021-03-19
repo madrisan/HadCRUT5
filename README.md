@@ -124,7 +124,7 @@ $ ./hadcrut5-bars.py --outfile plots/HadCRUT5-global-1961-1990.png
 ![HadCRUT5 bar plotting related to 1961-1990](plots/HadCRUT5-global-1961-1990.png)
 
 ```
-$ ./hadcrut5-bars.py --period "1850-1900" --outfile plot/HadCRUT5-global-1850-1900.png
+$ ./hadcrut5-bars.py --period "1850-1900" --outfile plots/HadCRUT5-global-1850-1900.png
 ```
 ![HadCRUT5 bar plotting related to 1850-1900](plots/HadCRUT5-global-1850-1900.png)
 

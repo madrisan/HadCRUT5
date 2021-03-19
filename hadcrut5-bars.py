@@ -41,6 +41,12 @@ def parse_args():
     return parser.parse_args()
 
 def plotbar(dataset, outfile, period, verbose):
+    def major_formatter(x, pos):
+        return f'{x:.1f}' if x >= 0 else ''
+
+    # ax.yaxis.set_minor_formatter(yminor_formatter)
+    # view_limits(self, dmin, dmax)[source]
+
     bar_width = 0.7
 
     negative = [
@@ -63,11 +69,11 @@ def plotbar(dataset, outfile, period, verbose):
         'color' : 'white',
         'weight': 'bold',
     }
-    fontxl = { **basefont, "size": 16 }
-    fontxs = { **basefont, "size": 10 }
+    fontxl = { **basefont, "size": 20 }
+    fontxs = { **basefont, "size": 12 }
 
     plt.style.use("dark_background")
-    ax = plt.subplot(111)
+    fix, ax = plt.subplots()
 
     tas_mean = dataset["variables"]["tas_mean"][:]
     years = [y + 1850 for y in range(len(tas_mean))]
@@ -82,7 +88,6 @@ def plotbar(dataset, outfile, period, verbose):
         print(("tas_mean relative to {}: \\\n{}"
                .format(period, np.array(mean))))
 
-
     color_deep = lambda x: math.floor(math.fabs(x * 10))
     get_color = lambda x: positive[color_deep(x)] if x > 0 else negative[color_deep(x)]
     colors = [get_color(i) for i in mean]
@@ -91,12 +96,13 @@ def plotbar(dataset, outfile, period, verbose):
            mean,
            width=bar_width,
            color=colors,
-           alpha=0.6,
            align="center")
 
-    ax.axes.get_xaxis().set_visible(False)
-    ax.yaxis.set_label_position("right")
+    #ax.axis('off')
+    ax.set_frame_on(False)
     ax.yaxis.tick_right()
+    #ax.yaxis.set_major_formatter(ticker.FormatStrFormatter(' %+ 0.1f'))
+    ax.yaxis.set_major_formatter(major_formatter)
 
     upper, left = .95, .025
     last_year = years[-1]
@@ -123,7 +129,7 @@ def plotbar(dataset, outfile, period, verbose):
     fig.set_size_inches(10, 8)   # 1 inch equal to 80pt
 
     if outfile:
-        fig.savefig(outfile, dpi=80)
+        fig.savefig(outfile, dpi=80, bbox_inches='tight')
 
     plt.show()
 
