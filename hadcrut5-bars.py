@@ -6,8 +6,9 @@
 
 import argparse
 import math
-import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.colors
+
 import netCDF4 as nc
 import numpy as np
 import requests
@@ -44,26 +45,7 @@ def plotbar(dataset, outfile, period, verbose):
     def major_formatter(x, pos):
         return f'{x:.1f}' if x >= 0 else ''
 
-    # ax.yaxis.set_minor_formatter(yminor_formatter)
-    # view_limits(self, dmin, dmax)[source]
-
     bar_width = 0.7
-
-    negative = [
-        "#e6eeff", "#ccddff", "#b3ccff",
-        "#99bbff", "#80aaff", "#6699ff",
-        "#4d88ff", "#3377ff", "#1a66ff",
-        "#0055ff", "#004de6", "#0044cc",
-        "#003cb3", "#003399", "#002b80"
-    ]
-    positive = [
-        "#fee6e8", "#fdced2", "#fdb5bb",
-        "#fc9ca4", "#fb838d", "#fa6b77",
-        "#fa5260", "#f93949", "#f82032",
-        "#f7091c", "#df0719", "#c60616",
-        "#ad0513", "#940511", "#7c040e"
-    ]
-
     basefont = {
         'family': 'DejaVu Sans',
         'color' : 'white',
@@ -88,9 +70,9 @@ def plotbar(dataset, outfile, period, verbose):
         print(("tas_mean relative to {}: \\\n{}"
                .format(period, np.array(mean))))
 
-    color_deep = lambda x: math.floor(math.fabs(x * 10))
-    get_color = lambda x: positive[color_deep(x)] if x > 0 else negative[color_deep(x)]
-    colors = [get_color(i) for i in mean]
+    cmap = plt.cm.jet # or plt.cm.bwr
+    norm = matplotlib.colors.Normalize(vmin=-1, vmax=max(mean))
+    colors = cmap(norm(mean))
 
     ax.bar(years,
            mean,
@@ -98,7 +80,6 @@ def plotbar(dataset, outfile, period, verbose):
            color=colors,
            align="center")
 
-    #ax.axis('off')
     ax.set_frame_on(False)
     ax.yaxis.tick_right()
     ax.yaxis.set_major_formatter(major_formatter)
