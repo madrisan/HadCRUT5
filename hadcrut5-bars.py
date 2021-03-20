@@ -129,7 +129,7 @@ def plotbar(dataset, outfile, period, verbose):
     fig.set_size_inches(10, 8)   # 1 inch equal to 80pt
 
     if outfile:
-        fig.savefig(outfile, dpi=80, bbox_inches=None)
+        fig.savefig(outfile, dpi=80, bbox_inches='tight')
 
     plt.show()
 
