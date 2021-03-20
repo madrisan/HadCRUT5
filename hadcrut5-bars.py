@@ -101,8 +101,8 @@ def plotbar(dataset, outfile, period, verbose):
     #ax.axis('off')
     ax.set_frame_on(False)
     ax.yaxis.tick_right()
-    #ax.yaxis.set_major_formatter(ticker.FormatStrFormatter(' %+ 0.1f'))
     ax.yaxis.set_major_formatter(major_formatter)
+    ax.tick_params(axis=u'both', which=u'both',length=0)
 
     upper, left = .95, .025
     last_year = years[-1]
@@ -129,7 +129,7 @@ def plotbar(dataset, outfile, period, verbose):
     fig.set_size_inches(10, 8)   # 1 inch equal to 80pt
 
     if outfile:
-        fig.savefig(outfile, dpi=80, bbox_inches='tight')
+        fig.savefig(outfile, dpi=80, bbox_inches=None)
 
     plt.show()
 
