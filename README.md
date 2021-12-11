@@ -57,7 +57,7 @@ examples:
   hadcrut5-plot.py --period "1850-1900" --smoother 5 --outfile HadCRUT-1850-1900-smoother.png
 ```
 
-`hadcrut5-plot.py` select the period `1961-90` by default but supports (see the command-line switch`--period`) two other base periods found in the literature: `1850-1900`, and `1850-1900`.
+`hadcrut5-plot.py` select the period `1961-90` by default but supports (see the command-line switch`--period`) two other base periods found in the literature: `1850-1900`, and `1880-1920`.
 
 ```
 $ ./hadcrut5-plot.py --outfile plots/HadCRUT5.png
