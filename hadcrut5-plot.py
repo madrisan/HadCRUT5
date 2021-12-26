@@ -62,7 +62,7 @@ def parse_args():
 
 def plotline(datasets, outfile, period, chunksize, verbose):
     mpl.style.use("seaborn-notebook")
-    anomaly = None
+    anomaly_current = anomaly_max = None
 
     for item in datasets:
         tas_mean  = datasets[item]["variables"]["tas_mean"][:]
@@ -80,11 +80,6 @@ def plotline(datasets, outfile, period, chunksize, verbose):
                    .format(period, norm_temp)))
             print("tas_mean relative to {}: \\\n{}".format(period, np.array(mean)))
 
-        if item == "Global":
-            anomaly = hadcrut5.dataset_anomaly(mean)
-            if verbose:
-                print("Max anomaly for Global dataset: {}".format(anomaly))
-
         lower, _ = hadcrut5.dataset_normalize(tas_lower, period, norm_temp)
         upper, _ = hadcrut5.dataset_normalize(tas_upper, period, norm_temp)
 
@@ -99,6 +94,13 @@ def plotline(datasets, outfile, period, chunksize, verbose):
 
         plt.plot(years, mean, linewidth=2, markersize=12, label=item)
 
+        if item == "Global":
+            anomaly_current = hadcrut5.dataset_current_anomaly(mean)
+            anomaly_max = hadcrut5.dataset_max_anomaly(mean)
+            if verbose:
+                print("Current anomaly for Global dataset: {}".format(anomaly_current))
+                print("Max anomaly for Global dataset: {}".format(anomaly_max))
+
     plt.hlines(0, np.min(years), np.max(years),
                colors='gray', linestyles='dotted')
 
@@ -111,16 +113,18 @@ def plotline(datasets, outfile, period, chunksize, verbose):
         ylabel += " ({}-year averages)".format(chunksize)
     plt.ylabel(ylabel)
 
-    if anomaly:
+    if anomaly_current:
         ax = plt.gca()
-        plt.annotate("max anomaly: {0:+.2f}°C".format(anomaly),
+        plt.annotate("current anomaly: {0:+.2f}°C".format(anomaly_current),
                      xy=(0.96, 0.04),
                      xycoords="axes fraction",
                      fontsize=9,
                      horizontalalignment="right",
                      verticalalignment="bottom",
                      bbox={
-                         "facecolor": "{}".format("blue" if anomaly <= 0 else "red"),
+                         "facecolor": "{}".format(
+                             "blue" if anomaly_current <= 0 else "red"
+                         ),
                          "alpha": 0.3,
                          "pad": 5
                      })

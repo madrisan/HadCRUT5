@@ -114,8 +114,12 @@ def dataset_set(global_temps, northern_temps, southern_temps):
 
     return datasets
 
-def dataset_anomaly(temperatures):
-    """Return the maximum anomaly with respect to 'base_temp'"""
+def dataset_current_anomaly(temperatures):
+    """Return the current anomaly"""
+    return temperatures[-1]
+
+def dataset_max_anomaly(temperatures):
+    """Return the maximum anomaly with respect to 'temperatures'"""
     return np.max([t for t in temperatures])
 
 def dataset_smoother(years, temperatures, chunksize):
