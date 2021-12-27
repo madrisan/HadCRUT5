@@ -120,7 +120,7 @@ def dataset_current_anomaly(temperatures):
 
 def dataset_max_anomaly(temperatures):
     """Return the maximum anomaly with respect to 'temperatures'"""
-    return np.max([t for t in temperatures])
+    return np.max(temperatures)
 
 def dataset_smoother(years, temperatures, chunksize):
     """Make the lines smoother by using {chunksize}-year means"""
