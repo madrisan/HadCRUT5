@@ -124,10 +124,8 @@ def dataset_max_anomaly(temperatures):
 
 def dataset_smoother(years, temperatures, chunksize):
     """Make the lines smoother by using {chunksize}-year means"""
-    years = [y for y in years if not y % chunksize]
-    temperatures = [
-        np.mean(temperatures[i*chunksize:(i+1)*chunksize]) \
-            for i in range((len(temperatures) + chunksize - 1) // chunksize )
-    ]
-
-    return years, temperatures
+    data_range = range((len(years) + chunksize - 1) // chunksize)
+    subset_years = [years[i*chunksize] for i in data_range]
+    subset_temperatures = [
+        np.mean(temperatures[i*chunksize:(i+1)*chunksize]) for i in data_range]
+    return subset_years, subset_temperatures
