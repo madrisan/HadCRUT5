@@ -19,7 +19,7 @@ def parse_args():
     examples = [
        "%(prog)s",
        "%(prog)s --global",
-       "%(prog)s --outfile HadCRUT5.png",
+       "%(prog)s --outfile HadCRUT5.png --annotate",
        "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png",
        "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png",
        "%(prog)s --period \"1850-1900\" --smoother 5 --outfile HadCRUT-1850-1900-smoother.png"]
@@ -53,6 +53,11 @@ def parse_args():
         dest="southern_temps",
         help="Southern Hemisphere Temperatures")
     parser.add_argument(
+        "-a", "--annotate",
+        action="store_true",
+        dest="annotate_plot",
+        help="add the temperature annotations")
+    parser.add_argument(
         "-v", "--verbose",
         action="store_true",
         dest="verbose",
@@ -60,7 +65,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def plotline(datasets, outfile, period, chunksize, verbose):
+def plotline(datasets, outfile, period, chunksize, annotations, verbose):
     mpl.style.use("seaborn-notebook")
     anomaly_current = {}
     anomaly_max = {}
@@ -94,11 +99,23 @@ def plotline(datasets, outfile, period, chunksize, verbose):
         else:
             plt.fill_between(years, lower, upper, color="lightgray")
 
-        anomaly_current[item] = hadcrut5.dataset_current_anomaly(mean)
-        anomaly_max[item] = hadcrut5.dataset_max_anomaly(mean)
-        if verbose:
-            print("Current anomalies: {}".format(anomaly_current[item]))
-            print("Max anomalies: {}".format(anomaly_max[item]))
+            anomaly_current[item] = hadcrut5.dataset_current_anomaly(mean)
+            anomaly_max[item] = hadcrut5.dataset_max_anomaly(mean)
+            if verbose:
+                print("Current anomalies: {}".format(anomaly_current[item]))
+                print("Max anomalies: {}".format(anomaly_max[item]))
+
+            if annotations:
+                plt.annotate("{0:.2f}°C".format(anomaly_current[item]),
+                             xy=(years[-1]-5, anomaly_current[item]+.05),
+                             fontsize=6,
+                             horizontalalignment='left',
+                             bbox={
+                                 "facecolor": "lightgray",
+                                 "alpha": 0.6,
+                                 "pad": 3
+                            }
+                )
 
         plt.plot(years, mean, linewidth=2, markersize=12, label=item)
 
@@ -107,32 +124,32 @@ def plotline(datasets, outfile, period, chunksize, verbose):
 
     plt.title(
         "HadCRUT5: land and sea temperature anomalies relative to {}".format(period))
-    plt.xlabel("Year")
+    plt.xlabel("year", fontsize=10)
 
     ylabel = "Temperature Anomalies in °C"
     if chunksize > 1:
         ylabel += " ({}-year averages)".format(chunksize)
-    plt.ylabel(ylabel)
+    else:
+        current = anomaly_current.get('Global')
+        maximum = anomaly_max.get('Global')
+        if current and maximum:
+            ax = plt.gca()
+            plt.annotate(("current global anomaly: {0:+.2f}°C, max: {1:+.2f}°C"
+                          .format(current, maximum)),
+                         xy=(0.98, 0.03),
+                         xycoords="axes fraction",
+                         fontsize=8,
+                         horizontalalignment="right",
+                         verticalalignment="bottom",
+                         bbox={
+                             "facecolor": "{}".format(
+                                 "blue" if current <= 0 else "red"
+                             ),
+                             "alpha": 0.3,
+                             "pad": 5,
+                         })
 
-    current = anomaly_current.get('Global')
-    maximum = anomaly_max.get('Global')
-    if current and maximum:
-        ax = plt.gca()
-        plt.annotate(("current global anomaly: {0:+.2f}°C, max: {1:+.2f}°C"
-                      .format(current, maximum)),
-                     xy=(0.96, 0.04),
-                     xycoords="axes fraction",
-                     fontsize=9,
-                     horizontalalignment="right",
-                     verticalalignment="bottom",
-                     bbox={
-                         "facecolor": "{}".format(
-                             "blue" if current <= 0 else "red"
-                         ),
-                         "alpha": 0.3,
-                         "pad": 5
-                     })
-
+    plt.ylabel(ylabel, fontsize=10)
     plt.legend()
 
     if outfile:
@@ -166,6 +183,7 @@ def main():
              args.outfile,
              args.period,
              int(args.smoother) if args.smoother else 1,
+             args.annotate_plot,
              args.verbose)
 
 if __name__ == "__main__":
