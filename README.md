@@ -29,13 +29,13 @@ They require the Python libraries: Matplotlib, netCDF4, NumPy, and Requests.
 
 ```
 $ ./hadcrut5-plot.py --help
-usage: hadcrut5-plot.py [-h] [-f OUTFILE] [-p PERIOD] [-m SMOOTHER] [-g] [-n] [-s] [-v]
+usage: hadcrut5-plot.py [-h] [-f OUTFILE] [-p PERIOD] [-m SMOOTHER] [-g] [-n] [-s] [-a ANNOTATE] [-v]
 
 Parse and plot the HadCRUT5 temperature datasets v.2 (stable)
 Copyright (C) 2020-2021 Davide Madrisan <davide.madrisan@gmail.com>
 License: GNU General Public License v3.0
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -f OUTFILE, --outfile OUTFILE
                         name of the output PNG file
@@ -46,12 +46,14 @@ optional arguments:
   -g, --global          plot the Global Temperatures
   -n, --northern        Northern Hemisphere Temperatures
   -s, --southern        Southern Hemisphere Temperatures
+  -a ANNOTATE, --annotate ANNOTATE
+                        add temperature annotations (0: no annotations, 1 (default): bottom only, 2: all ones
   -v, --verbose         make the operation more talkative
 
 examples:
   hadcrut5-plot.py
   hadcrut5-plot.py --global
-  hadcrut5-plot.py --outfile HadCRUT5.png
+  hadcrut5-plot.py --outfile HadCRUT5.png --annotate=2
   hadcrut5-plot.py --period "1850-1900" --outfile HadCRUT5-1850-1900.png
   hadcrut5-plot.py --period "1880-1920" --outfile HadCRUT5-1880-1920.png
   hadcrut5-plot.py --period "1850-1900" --smoother 5 --outfile HadCRUT-1850-1900-smoother.png
@@ -60,17 +62,17 @@ examples:
 `hadcrut5-plot.py` select the period `1961-90` by default but supports (see the command-line switch`--period`) two other base periods found in the literature: `1850-1900`, and `1880-1920`.
 
 ```
-$ ./hadcrut5-plot.py --annotate --outfile plots/HadCRUT5.png
+$ ./hadcrut5-plot.py --annotate=2 --outfile plots/HadCRUT5.png
 ```
 ![HadCRUT5 anomalies related to 1961-1990](plots/HadCRUT5.png)
 
 ```
-$ ./hadcrut5-plot.py --annotate --period "1850-1900" --outfile plots/HadCRUT5-1850-1900.png
+$ ./hadcrut5-plot.py --annotate=2 --period "1850-1900" --outfile plots/HadCRUT5-1850-1900.png
 ```
 ![HadCRUT5 anomalies related to 1850-1900](plots/HadCRUT5-1850-1900.png)
 
 ```
-$ ./hadcrut5-plot.py --annotate --period "1880-1920" --outfile plots/HadCRUT5-1880-1920.png
+$ ./hadcrut5-plot.py --annotate=2 --period "1880-1920" --outfile plots/HadCRUT5-1880-1920.png
 ```
 ![HadCRUT5 anomalies related to 1880-1920](plots/HadCRUT5-1880-1920.png)
 
@@ -103,7 +105,7 @@ Parse and plot the HadCRUT5 temperature datasets v.2 (stable)
 Copyright (C) 2020-2021 Davide Madrisan <davide.madrisan@gmail.com>
 License: GNU General Public License v3.0
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -f OUTFILE, --outfile OUTFILE
                         name of the output PNG file

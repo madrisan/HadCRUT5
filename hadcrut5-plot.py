@@ -19,7 +19,7 @@ def parse_args():
     examples = [
        "%(prog)s",
        "%(prog)s --global",
-       "%(prog)s --outfile HadCRUT5.png --annotate",
+       "%(prog)s --outfile HadCRUT5.png --annotate=2",
        "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png",
        "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png",
        "%(prog)s --period \"1850-1900\" --smoother 5 --outfile HadCRUT-1850-1900-smoother.png"]
@@ -54,9 +54,8 @@ def parse_args():
         help="Southern Hemisphere Temperatures")
     parser.add_argument(
         "-a", "--annotate",
-        action="store_true",
-        dest="annotate_plot",
-        help="add the temperature annotations")
+        action="store", dest="annotate", default="1",
+        help="add temperature annotations (0: no annotations, 1 (default): bottom only, 2: all ones")
     parser.add_argument(
         "-v", "--verbose",
         action="store_true",
@@ -65,7 +64,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def plotline(datasets, outfile, period, chunksize, annotations, verbose):
+def plotline(datasets, outfile, period, chunksize, annotate, verbose):
     mpl.style.use("seaborn-notebook")
     anomaly_current = {}
     anomaly_max = {}
@@ -105,7 +104,7 @@ def plotline(datasets, outfile, period, chunksize, annotations, verbose):
                 print("Current anomalies: {}".format(anomaly_current[item]))
                 print("Max anomalies: {}".format(anomaly_max[item]))
 
-            if annotations:
+            if annotate > 1:
                 plt.annotate("{0:.2f}°C".format(anomaly_current[item]),
                              xy=(years[-1]-5, anomaly_current[item]+.05),
                              fontsize=6,
@@ -132,7 +131,7 @@ def plotline(datasets, outfile, period, chunksize, annotations, verbose):
     else:
         current = anomaly_current.get('Global')
         maximum = anomaly_max.get('Global')
-        if current and maximum:
+        if annotate > 0 and current and maximum:
             ax = plt.gca()
             plt.annotate(("current global anomaly: {0:+.2f}°C, max: {1:+.2f}°C"
                           .format(current, maximum)),
@@ -183,7 +182,7 @@ def main():
              args.outfile,
              args.period,
              int(args.smoother) if args.smoother else 1,
-             args.annotate_plot,
+             int(args.annotate) if args.annotate else 1,
              args.verbose)
 
 if __name__ == "__main__":
