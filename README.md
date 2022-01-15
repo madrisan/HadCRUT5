@@ -37,26 +37,25 @@ License: GNU General Public License v3.0
 
 options:
   -h, --help            show this help message and exit
-  -f OUTFILE, --outfile OUTFILE
-                        name of the output PNG file
-  -p PERIOD, --period PERIOD
-                        show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920
-  -m SMOOTHER, --smoother SMOOTHER
-                        make the lines smoother by using N-year means
-  -g, --global          plot the Global Temperatures
-  -n, --northern        Northern Hemisphere Temperatures
-  -s, --southern        Southern Hemisphere Temperatures
   -a ANNOTATE, --annotate ANNOTATE
                         add temperature annotations (0: no annotations, 1 (default): bottom only, 2: all ones
+  -f OUTFILE, --outfile OUTFILE
+                        name of the output PNG file
+  -g, --global          plot the Global Temperatures
+  -m SMOOTHER, --smoother SMOOTHER
+                        make the lines smoother by using N-year means
+  -n, --northern        Northern Hemisphere Temperatures
+  -p PERIOD, --period PERIOD
+                        show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920
+  -s, --southern        Southern Hemisphere Temperatures
   -v, --verbose         make the operation more talkative
 
 examples:
   hadcrut5-plot.py
-  hadcrut5-plot.py --global
-  hadcrut5-plot.py --outfile HadCRUT5.png --annotate=2
-  hadcrut5-plot.py --period "1850-1900" --outfile HadCRUT5-1850-1900.png
+  hadcrut5-plot.py --global --annotate=2
+  hadcrut5-plot.py --period "1850-1900"
+  hadcrut5-plot.py --period "1850-1900" --smoother 5
   hadcrut5-plot.py --period "1880-1920" --outfile HadCRUT5-1880-1920.png
-  hadcrut5-plot.py --period "1850-1900" --smoother 5 --outfile HadCRUT-1850-1900-smoother.png
 ```
 
 `hadcrut5-plot.py` select the period `1961-90` by default but supports (see the command-line switch`--period`) two other base periods found in the literature: `1850-1900`, and `1880-1920`.
@@ -106,9 +105,9 @@ options:
 
 examples:
   hadcrut5-bars.py
+  hadcrut5-bars.py --period "1850-1900"
+  hadcrut5-bars.py --period "1880-1920"
   hadcrut5-bars.py --outfile HadCRUT5-global.png
-  hadcrut5-bars.py --period "1850-1900" --outfile HadCRUT5-global-1850-1900.png
-  hadcrut5-bars.py --period "1880-1920" --outfile HadCRUT5-global-1880-1920.png
 ```
 The image for to the anomalies related to the period `1880-1920` follows.
 ```

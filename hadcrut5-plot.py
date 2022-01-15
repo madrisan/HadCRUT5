@@ -18,35 +18,42 @@ def parse_args():
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
        "%(prog)s",
-       "%(prog)s --annotate=2",
-       "%(prog)s --global",
+       "%(prog)s --global --annotate=2",
        "%(prog)s --period \"1850-1900\"",
        "%(prog)s --period \"1850-1900\" --smoother 5",
        "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png"]
 
     parser = hadcrut5.argparser(descr, examples)
     parser.add_argument(
+        "-a", "--annotate",
+        action="store", dest="annotate", default="1",
+        help="add temperature annotations (0: no annotations, 1 (default): bottom only, 2: all ones")
+    parser.add_argument(
         "-f", "--outfile",
-        action="store", dest="outfile",
+        action="store",
+        dest="outfile",
         help="name of the output PNG file")
-    parser.add_argument(
-        "-p", "--period",
-        action="store", dest="period", default="1961-1990",
-        help="show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920")
-    parser.add_argument(
-        "-m", "--smoother",
-        action="store", dest="smoother",
-        help="make the lines smoother by using N-year means")
     parser.add_argument(
         "-g", "--global",
         action="store_true",
         dest="plot_global",
         help="plot the Global Temperatures")
     parser.add_argument(
+        "-m", "--smoother",
+        action="store",
+        dest="smoother",
+        help="make the lines smoother by using N-year means")
+    parser.add_argument(
         "-n", "--northern",
         action="store_true",
         dest="plot_northern",
         help="Northern Hemisphere Temperatures")
+    parser.add_argument(
+        "-p", "--period",
+        action="store",
+        dest="period",
+        default="1961-1990",
+        help="show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920")
     parser.add_argument(
         "-s", "--southern",
         action='store_true',
