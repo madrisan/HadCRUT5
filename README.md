@@ -81,16 +81,7 @@ $ ./hadcrut5-plot.py --annotate=2 --period "1880-1920" --outfile plots/HadCRUT5-
 By adding the command-line option `--smoother N` you can create the same three plots, but using the N-year means data.
 For instance `--smoother 5` will get you a better idea of the trend lines.
 
-```
-$ ./hadcrut5-plot.py --smoother 5 --outfile plots/HadCRUT5-smoother.png
-```
-![HadCRUT5 anomalies related to 1961-1990 with 5-year means](plots/HadCRUT5-smoother.png)
-
-```
-$ ./hadcrut5-plot.py --period "1850-1900" --smoother 5 --outfile plots/HadCRUT5-1850-1900-smoother.png
-```
-![HadCRUT5 anomalies related to 1850-1900 with 5-year means](plots/HadCRUT5-1850-1900-smoother.png)
-
+Image generated for the anomalies related to the period `1880-1920`.
 ```
 $ ./hadcrut5-plot.py --period "1880-1920" --smoother 5 --outfile plots/HadCRUT5-1880-1920-smoother.png
 ```
@@ -119,17 +110,7 @@ examples:
   hadcrut5-bars.py --period "1850-1900" --outfile HadCRUT5-global-1850-1900.png
   hadcrut5-bars.py --period "1880-1920" --outfile HadCRUT5-global-1880-1920.png
 ```
-
-```
-$ ./hadcrut5-bars.py --outfile plots/HadCRUT5-global-1961-1990.png
-```
-![HadCRUT5 bar plotting related to 1961-1990](plots/HadCRUT5-global-1961-1990.png)
-
-```
-$ ./hadcrut5-bars.py --period "1850-1900" --outfile plots/HadCRUT5-global-1850-1900.png
-```
-![HadCRUT5 bar plotting related to 1850-1900](plots/HadCRUT5-global-1850-1900.png)
-
+The image for to the anomalies related to the period `1880-1920` follows.
 ```
 $ ./hadcrut5-bars.py --period "1880-1920" --outfile plots/HadCRUT5-global-1880-1920.png
 ```
