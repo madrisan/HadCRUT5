@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # The library functions for parsing the HadCRUT5 temperature datasets
-# Copyright (c) 2020-2021 Davide Madrisan <davide.madrisan@gmail.com>
+# Copyright (c) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
@@ -10,7 +10,7 @@ import numpy as np
 import requests
 
 __author__ = "Davide Madrisan"
-__copyright__ = "Copyright (C) 2020-2021 Davide Madrisan"
+__copyright__ = "Copyright (C) 2020-2022 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
 __version__ = "2"
 __email__ = "davide.madrisan@gmail.com"

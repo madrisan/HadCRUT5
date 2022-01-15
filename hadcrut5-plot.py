@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # Parse and plot the HadCRUT5 temperature datasets
-# Copyright (c) 2020 Davide Madrisan <davide.madrisan@gmail.com>
+# Copyright (c) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse

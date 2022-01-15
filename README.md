@@ -32,7 +32,7 @@ $ ./hadcrut5-plot.py --help
 usage: hadcrut5-plot.py [-h] [-f OUTFILE] [-p PERIOD] [-m SMOOTHER] [-g] [-n] [-s] [-a ANNOTATE] [-v]
 
 Parse and plot the HadCRUT5 temperature datasets v.2 (stable)
-Copyright (C) 2020-2021 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
 License: GNU General Public License v3.0
 
 options:
@@ -93,7 +93,7 @@ $ ./hadcrut5-plot.py --period "1880-1920" --smoother 5 --outfile plots/HadCRUT5-
 usage: hadcrut5-bars.py [-h] [-f OUTFILE] [-p PERIOD] [-v]
 
 Parse and plot the HadCRUT5 temperature datasets v.2 (stable)
-Copyright (C) 2020-2021 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
 License: GNU General Public License v3.0
 
 options:
