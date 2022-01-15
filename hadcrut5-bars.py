@@ -20,9 +20,9 @@ def parse_args():
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
        "%(prog)s",
-       "%(prog)s --outfile HadCRUT5-global.png",
-       "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-global-1850-1900.png",
-       "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-global-1880-1920.png"]
+       "%(prog)s --period \"1850-1900\"",
+       "%(prog)s --period \"1880-1920\"",
+       "%(prog)s --outfile HadCRUT5-global.png"]
 
     parser = hadcrut5.argparser(descr, examples)
     parser.add_argument(
@@ -111,6 +111,7 @@ def plotbar(dataset, outfile, period, verbose):
 
     if outfile:
         fig.savefig(outfile, dpi=80, bbox_inches='tight')
+        plt.close(fig)
 
     plt.show()
 

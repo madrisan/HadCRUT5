@@ -18,11 +18,11 @@ def parse_args():
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
        "%(prog)s",
+       "%(prog)s --annotate=2",
        "%(prog)s --global",
-       "%(prog)s --outfile HadCRUT5.png --annotate=2",
-       "%(prog)s --period \"1850-1900\" --outfile HadCRUT5-1850-1900.png",
-       "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png",
-       "%(prog)s --period \"1850-1900\" --smoother 5 --outfile HadCRUT-1850-1900-smoother.png"]
+       "%(prog)s --period \"1850-1900\"",
+       "%(prog)s --period \"1850-1900\" --smoother 5",
+       "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png"]
 
     parser = hadcrut5.argparser(descr, examples)
     parser.add_argument(
@@ -153,8 +153,8 @@ def plotline(datasets, outfile, period, chunksize, annotate, verbose):
 
     if outfile:
         plt.savefig(outfile, transparent=False)
-
-    plt.show()
+    else:
+        plt.show()
 
 def main():
     args = parse_args()
