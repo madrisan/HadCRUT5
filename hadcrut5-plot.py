@@ -40,22 +40,18 @@ def parse_args():
     parser.add_argument(
         "-g", "--global",
         action="store_true",
-        dest="global_temps",
+        dest="plot_global",
         help="plot the Global Temperatures")
     parser.add_argument(
         "-n", "--northern",
         action="store_true",
-        dest="northern_temps",
+        dest="plot_northern",
         help="Northern Hemisphere Temperatures")
     parser.add_argument(
         "-s", "--southern",
         action='store_true',
-        dest="southern_temps",
+        dest="plot_southern",
         help="Southern Hemisphere Temperatures")
-    parser.add_argument(
-        "-a", "--annotate",
-        action="store", dest="annotate", default="1",
-        help="add temperature annotations (0: no annotations, 1 (default): bottom only, 2: all ones")
     parser.add_argument(
         "-v", "--verbose",
         action="store_true",
@@ -161,16 +157,16 @@ def main():
     if args.period not in ["1850-1900", "1880-1920", "1961-1990"]:
         raise Exception("Unsupported reference period: {}".format(args.period))
 
-    if args.global_temps or args.northern_temps or args.southern_temps:
-        global_temps = args.global_temps
-        northern_temps = args.northern_temps
-        southern_temps = args.southern_temps
+    if args.plot_global or args.plot_northern or args.plot_southern:
+        plot_global = args.plot_global
+        plot_northern = args.plot_northern
+        plot_southern = args.plot_southern
     else:
-        global_temps = northern_temps = southern_temps = True
+        plot_global = plot_northern = plot_southern = True
 
-    datasets = hadcrut5.dataset_set(global_temps,
-                                    northern_temps,
-                                    southern_temps)
+    datasets = hadcrut5.dataset_set_annual(plot_global,
+                                           plot_northern,
+                                           plot_southern)
 
     for item in datasets:
         datafile = datasets[item]["filename"]

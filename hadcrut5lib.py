@@ -93,7 +93,7 @@ def dataset_normalize(tas_mean, period, norm_temp=None):
 
     return tas_mean_normalized, norm_temp
 
-def dataset_set(global_temps, northern_temps, southern_temps):
+def dataset_set_annual(global_temps, northern_temps, southern_temps):
     # List of the HadCRUT.5.0.1.0 datasets we want to plot.
     # Note: We can dump a NetCFG file using the command:
     #       $ ncdump -h <ncfile>
