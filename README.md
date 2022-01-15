@@ -62,9 +62,9 @@ examples:
 `hadcrut5-plot.py` select the period `1961-90` by default but supports (see the command-line switch`--period`) two other base periods found in the literature: `1850-1900`, and `1880-1920`.
 
 ```
-$ ./hadcrut5-plot.py --annotate=2 --outfile plots/HadCRUT5.png
+$ ./hadcrut5-plot.py --annotate=2 --outfile plots/HadCRUT5-1961-1990.png
 ```
-![HadCRUT5 anomalies related to 1961-1990](plots/HadCRUT5.png)
+![HadCRUT5 anomalies related to 1961-1990](plots/HadCRUT5-1961-1990.png)
 
 ```
 $ ./hadcrut5-plot.py --annotate=2 --period "1850-1900" --outfile plots/HadCRUT5-1850-1900.png
