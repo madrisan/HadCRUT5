@@ -98,7 +98,8 @@ def dataset_normalize(tas_mean, period, norm_temp=None):
 
     return tas_mean_normalized, norm_temp
 
-def dataset(time_series, global_temps, northern_temps, southern_temps):
+def dataset(time_series,
+            global_temps=True, northern_temps=True, southern_temps=True):
     """
     Return the list of HadCRUT dataset files to be used/downloaded
     """
@@ -128,6 +129,10 @@ def dataset(time_series, global_temps, northern_temps, southern_temps):
         }
 
     return datasets
+
+def dataset_annual(global_temps=True, northern_temps=True, southern_temps=True):
+    """Return the list of HadCRUT annual dataset files to be used/downloaded"""
+    return dataset("annual", global_temps, northern_temps, southern_temps)
 
 def dataset_current_anomaly(temperatures):
     """Return the current anomaly"""

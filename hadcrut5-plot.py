@@ -179,20 +179,16 @@ def main():
     if args.period not in ["1850-1900", "1880-1920", "1961-1990"]:
         raise Exception("Unsupported reference period: {}".format(args.period))
 
-    if args.plot_global or args.plot_northern or args.plot_southern:
-        plot_global = args.plot_global
-        plot_northern = args.plot_northern
-        plot_southern = args.plot_southern
-    else:
-        plot_global = plot_northern = plot_southern = True
-
     if args.time_series not in ["annual", "monthly"]:
         raise Exception("Unsupported time series \"{}\"".format(time_series))
 
-    datasets = hadcrut5.dataset(args.time_series,
-                                plot_global,
-                                plot_northern,
-                                plot_southern)
+    if args.plot_global or args.plot_northern or args.plot_southern:
+        datasets = hadcrut5.dataset(args.time_series,
+                                    args.plot_global,
+                                    args.plot_northern,
+                                    args.plot_southern)
+    else:
+        datasets = hadcrut5.dataset(args.time_series)
 
     for item in datasets:
         datafile = datasets[item]["filename"]
