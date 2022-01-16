@@ -48,6 +48,8 @@ options:
   -p PERIOD, --period PERIOD
                         show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920
   -s, --southern        Southern Hemisphere Temperatures
+  -t TIME_SERIES, --time-series TIME_SERIES
+                        do plot the "annual" time series (default) or the "monthly" one
   -v, --verbose         make the operation more talkative
 
 examples:
@@ -56,6 +58,7 @@ examples:
   hadcrut5-plot.py --period "1850-1900"
   hadcrut5-plot.py --period "1850-1900" --smoother 5
   hadcrut5-plot.py --period "1880-1920" --outfile HadCRUT5-1880-1920.png
+  hadcrut5-plot.py --period "1880-1920" --time-series monthly --global
 ```
 
 `hadcrut5-plot.py` select the period `1961-90` by default but supports (see the command-line switch`--period`) two other base periods found in the literature: `1850-1900`, and `1880-1920`.

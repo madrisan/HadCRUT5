@@ -121,7 +121,7 @@ def main():
         raise Exception(("Unsupported reference period: {}"
                          .format(args.period)))
 
-    datasets = hadcrut5.dataset_set_annual(True, False, False)
+    datasets = hadcrut5.dataset("annual", True, False, False)
     global_dataset = datasets["Global"]
 
     datafile = global_dataset["filename"]

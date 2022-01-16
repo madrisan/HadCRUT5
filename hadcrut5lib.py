@@ -79,12 +79,17 @@ def dataset_normalize(tas_mean, period, norm_temp=None):
         # the original dataset is based on the reference period 1961-1990
         return (tas_mean, 0)
 
+    monthly_dataset = is_monthly_dataset(tas_mean)
+    m = 12 if monthly_dataset else 1
+
     if not norm_temp:
         if period == "1850-1900":
             # The dataset starts from 1850-01-01 00:00:00
-            norm_temp = np.mean(tas_mean[:50])
+            # so we calculate the mean of the first 50 years
+            norm_temp = np.mean(tas_mean[:50*m])
         elif period == "1880-1920":
-            norm_temp = np.mean(tas_mean[30:41])
+            # We have to skip the first 30 years here
+            norm_temp = np.mean(tas_mean[30*m:41*m])
         else:
             raise Exception("Unsupported period \"{}\"".format(period))
 
@@ -93,23 +98,33 @@ def dataset_normalize(tas_mean, period, norm_temp=None):
 
     return tas_mean_normalized, norm_temp
 
-def dataset_set_annual(global_temps, northern_temps, southern_temps):
+def dataset(time_series, global_temps, northern_temps, southern_temps):
+    """
+    Return the list of HadCRUT dataset files to be used/downloaded
+    """
     # List of the HadCRUT.5.0.1.0 datasets we want to plot.
     # Note: We can dump a NetCFG file using the command:
     #       $ ncdump -h <ncfile>
+    if time_series not in ["annual", "monthly"]:
+        raise Exception("Unsupported time series \"{}\"".format(time_series))
+
+    dataset_version = "5.0.1.0"
+    file_prefix = "HadCRUT.{}.analysis.summary_series".format(dataset_version)
     datasets = {}
 
     if global_temps:
         datasets["Global"] = {
-            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.global.annual.nc"
+            "filename": "{}.global.{}.nc".format(file_prefix, time_series)
         }
     if northern_temps:
         datasets["Northern Hemisphere"] = {
-            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.northern_hemisphere.annual.nc"
+            "filename": \
+            "{}.northern_hemisphere.{}.nc".format(file_prefix, time_series)
         }
     if southern_temps:
         datasets["Southern Hemisphere"] = {
-            "filename": "HadCRUT.5.0.1.0.analysis.summary_series.southern_hemisphere.annual.nc"
+            "filename": \
+            "{}.southern_hemisphere.{}.nc".format(file_prefix, time_series)
         }
 
     return datasets
@@ -129,3 +144,13 @@ def dataset_smoother(years, temperatures, chunksize):
     subset_temperatures = [
         np.mean(temperatures[i*chunksize:(i+1)*chunksize]) for i in data_range]
     return subset_years, subset_temperatures
+
+def is_monthly_dataset(temperatures):
+    """
+    Return True if the given dataset has monthly records and False otherwise
+    (annual records)
+    """
+    # for example:
+    # - 172 annual records
+    # - 2063 monthly records (2063 // 12 = 171)
+    return (len(temperatures) // 12) > 100

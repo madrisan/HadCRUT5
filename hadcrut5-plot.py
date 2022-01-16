@@ -21,7 +21,8 @@ def parse_args():
        "%(prog)s --global --annotate=2",
        "%(prog)s --period \"1850-1900\"",
        "%(prog)s --period \"1850-1900\" --smoother 5",
-       "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png"]
+       "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png",
+       "%(prog)s --period \"1880-1920\" --time-series monthly --global"]
 
     parser = hadcrut5.argparser(descr, examples)
     parser.add_argument(
@@ -60,6 +61,12 @@ def parse_args():
         dest="plot_southern",
         help="Southern Hemisphere Temperatures")
     parser.add_argument(
+        "-t", "--time-series",
+        action='store',
+        default="annual",
+        dest="time_series",
+        help="do plot the \"annual\" time series (default) or the \"monthly\" one")
+    parser.add_argument(
         "-v", "--verbose",
         action="store_true",
         dest="verbose",
@@ -67,7 +74,8 @@ def parse_args():
 
     return parser.parse_args()
 
-def plotline(datasets, outfile, period, chunksize, annotate, verbose):
+def plotline(datasets, outfile, period, time_series,
+             chunksize, annotate, verbose):
     mpl.style.use("seaborn-notebook")
     anomaly_current = {}
     anomaly_max = {}
@@ -77,7 +85,9 @@ def plotline(datasets, outfile, period, chunksize, annotate, verbose):
         tas_lower = datasets[item]["variables"]["tas_lower"][:]
         tas_upper = datasets[item]["variables"]["tas_upper"][:]
 
-        years = [y + 1850 for y in range(len(tas_mean))]
+        is_monthly = hadcrut5.is_monthly_dataset(tas_mean)
+        increment = 1/12 if is_monthly else 1
+        years = [y * increment + 1850 for y in range(len(tas_mean))]
         if verbose:
             print("years: \\\n{}".format(np.array(years)))
             print("temperatures ({}): \\\n{}".format(item, tas_mean))
@@ -119,7 +129,11 @@ def plotline(datasets, outfile, period, chunksize, annotate, verbose):
                             }
                 )
 
-        plt.plot(years, mean, linewidth=2, markersize=12, label=item)
+        plt.plot(years,
+                 mean,
+                 linewidth=(1 if is_monthly else 2),
+                 markersize=12,
+                 label=item)
 
     plt.hlines(0, np.min(years), np.max(years),
                colors='gray', linestyles='dotted')
@@ -128,7 +142,8 @@ def plotline(datasets, outfile, period, chunksize, annotate, verbose):
         "HadCRUT5: land and sea temperature anomalies relative to {}".format(period))
     plt.xlabel("year", fontsize=10)
 
-    ylabel = "Temperature Anomalies in °C"
+    ylabel = ("{} Temperature Anomalies in °C"
+              .format("Monthly" if is_monthly else "Annual"))
     if chunksize > 1:
         ylabel += " ({}-year averages)".format(chunksize)
     else:
@@ -171,9 +186,13 @@ def main():
     else:
         plot_global = plot_northern = plot_southern = True
 
-    datasets = hadcrut5.dataset_set_annual(plot_global,
-                                           plot_northern,
-                                           plot_southern)
+    if args.time_series not in ["annual", "monthly"]:
+        raise Exception("Unsupported time series \"{}\"".format(time_series))
+
+    datasets = hadcrut5.dataset(args.time_series,
+                                plot_global,
+                                plot_northern,
+                                plot_southern)
 
     for item in datasets:
         datafile = datasets[item]["filename"]
@@ -184,6 +203,7 @@ def main():
     plotline(datasets,
              args.outfile,
              args.period,
+             args.time_series,
              int(args.smoother) if args.smoother else 1,
              int(args.annotate) if args.annotate else 1,
              args.verbose)
