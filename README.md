@@ -89,6 +89,16 @@ $ ./hadcrut5-plot.py --period "1880-1920" --smoother 5 --outfile plots/HadCRUT5-
 ```
 ![HadCRUT5 anomalies related to 1880-1920 with 5-year means](plots/HadCRUT5-1880-1920-smoother.png)
 
+### Plots using the monthly mean data
+
+The command-line option `--time-series monthly` selects the monthly HadCRUT5 datasets (by default the dataset providing the annual means is selected).
+
+Image displying the monthly anomalies related to the period `1880-1920`, for the global temperatures only.
+```
+$ ./hadcrut5-plot.py --global --period "1880-1920" --time-series monthly
+```
+![HadCRUT5 monthly global anomalies related to 1880-1920 means](plots/HadCRUT5-monthly-global-1880-1920.png)
+
 ## hadcrut5-bars.py &mdash; Script usage
 
 ```
