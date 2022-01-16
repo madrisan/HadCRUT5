@@ -4,12 +4,9 @@
 # Copyright (c) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import argparse
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import netCDF4 as nc
 import numpy as np
-import requests
 
 import hadcrut5lib as hadcrut5
 
