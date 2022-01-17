@@ -83,8 +83,8 @@ def plotline(datasets, outfile, period, time_series,
         tas_upper = datasets[item]["variables"]["tas_upper"][:]
 
         is_monthly = hadcrut5.is_monthly_dataset(tas_mean)
-        increment = 1/12 if is_monthly else 1
-        years = [y * increment + 1850 for y in range(len(tas_mean))]
+        factor = 1/12 if is_monthly else 1
+        years = [y * factor + 1850 for y in range(len(tas_mean))]
         if verbose:
             print("years: \\\n{}".format(np.array(years)))
             print("temperatures ({}): \\\n{}".format(item, tas_mean))
@@ -128,7 +128,7 @@ def plotline(datasets, outfile, period, time_series,
 
         plt.plot(years,
                  mean,
-                 linewidth=(1 if is_monthly else 2),
+                 linewidth=(1 if is_monthly and chunksize < 2 else 2),
                  markersize=12,
                  label=item)
 
