@@ -46,11 +46,11 @@ class HadCRUT5(object):
     _VALID_DATATYPES = [_DEFAULT_DATATYPE, "monthly"]
 
     def __init__(self,
-                 period,
-                 datatype,
-                 enable_global,
-                 enable_northern,
-                 enable_southern,
+                 period = _DEFAULT_PERIOD,
+                 datatype = _DEFAULT_DATATYPE,
+                 enable_global = True,
+                 enable_northern = True,
+                 enable_southern = True,
                  verbose = False):
 
         if datatype not in self._VALID_DATATYPES:

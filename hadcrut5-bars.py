@@ -41,8 +41,6 @@ def plotbar(period, outfile, verbose):
         return f'{x:.1f}' if x >= 0 else ''
 
     hc5 = hadcrut5.HadCRUT5(period=period,
-                            datatype="annual",
-                            enable_global=True,
                             enable_northern=False,
                             enable_southern=False,
                             verbose=verbose)
