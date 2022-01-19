@@ -30,132 +30,170 @@ def argparser(descr, examples):
                description = copyleft(descr),
                epilog = "examples:\n  " + "\n  ".join(examples))
 
-def dataset_get(dataset_filename, verbose):
-    """Download a netCDFv4 HadCRUT5 file if not already found locally"""
-    url_datasets = "https://www.metoffice.gov.uk/hadobs"
-    url_dataset_hadcrut5 = (
-        "{}/hadcrut5/data/current/analysis/diagnostics"
-        .format(url_datasets))
-    url_dataset = "{}/{}".format(url_dataset_hadcrut5, dataset_filename)
 
-    try:
-        with open(dataset_filename) as dataset:
-            if verbose:
-                print(("Using the local dataset file: {}"
-                       .format(dataset_filename)))
-    except IOError:
-        if verbose:
-            print ("Downloading {} ...".format(dataset_filename))
+class HadCRUT5(object):
+    """Class for parsing and plotting HadCRUT5 datasets"""
 
-        response = requests.get(url_dataset, stream=True)
-        # Throw an error for bad status codes
-        response.raise_for_status()
+    """current dataset version"""
+    _DATASET_VERSION = "5.0.1.0"
 
-        with open(dataset_filename, 'wb') as handle:
-            for block in response.iter_content(1024):
-                handle.write(block)
+    """list of all the valid periods"""
+    _DEFAULT_PERIOD = "1961-1990"
+    _VALID_PERIODS = [_DEFAULT_PERIOD, "1850-1900", "1880-1920"]
 
-def dataset_load(dataset_filename):
-    """Load the data provided by the netCDFv4 file 'dataset_filename'"""
-    dataset = nc.Dataset(dataset_filename)
-    metadata = dataset.__dict__
-    dimensions = dataset.dimensions
-    variables = dataset.variables
+    """list of all the available data types"""
+    _DEFAULT_DATATYPE = "annual"
+    _VALID_DATATYPES = [_DEFAULT_DATATYPE, "monthly"]
 
-    return {
-        "dimensions": dimensions,
-        "metadata"  : metadata,
-        "variables" : variables
-    }
+    def __init__(self,
+                 period,
+                 datatype,
+                 enable_global,
+                 enable_northern,
+                 enable_southern,
+                 verbose = False):
 
-def dataset_normalize(tas_mean, period, norm_temp=None):
-    """
-    Produce the temperature means relative to the given period
-    If the norm_temp is not set it's calculated according to the given period.
-    Otherwise this value is used as normalization factor.
-    """
-    if period == "1961-1990":
-        # No changes required:
-        # the original dataset is based on the reference period 1961-1990
-        return (tas_mean, 0)
+        if datatype not in self._VALID_DATATYPES:
+            raise Exception(("Unsupported time series type \"{}\""
+                             .format(datatype)))
+        if period not in self._VALID_PERIODS:
+            raise Exception(("Unsupported reference period: {}"
+                             .format(period)))
 
-    monthly_dataset = is_monthly_dataset(tas_mean)
-    m = 12 if monthly_dataset else 1
+        # will be populated by load_datasets()
+        self._datasets = {}
 
-    if not norm_temp:
-        if period == "1850-1900":
-            # The dataset starts from 1850-01-01 00:00:00
-            # so we calculate the mean of the first 50 years
-            norm_temp = np.mean(tas_mean[:50*m])
-        elif period == "1880-1920":
-            # We have to skip the first 30 years here
-            norm_temp = np.mean(tas_mean[30*m:41*m])
-        else:
-            raise Exception("Unsupported period \"{}\"".format(period))
+        self._datatype = datatype
+        self._period = period
+        self._verbose = verbose
 
-    tas_mean_normalized = [
-        round(t - norm_temp, 8) for t in tas_mean[:]]
+        self._enable_global = enable_global
+        self._enable_northern = enable_northern
+        self._enable_southern = enable_southern
 
-    return tas_mean_normalized, norm_temp
+        self._global_filename = (
+            "HadCRUT.{}.analysis.summary_series.global.{}.nc"
+            .format(self._DATASET_VERSION, datatype))
+        self._northern_hemisphere_filename = (
+            "HadCRUT.{}.analysis.summary_series.northern_hemisphere.{}.nc"
+            .format(self._DATASET_VERSION, datatype))
+        self._southern_hemisphere_filename = (
+            "HadCRUT.{}.analysis.summary_series.southern_hemisphere.{}.nc"
+            .format(self._DATASET_VERSION, datatype))
 
-def dataset(time_series,
-            global_temps=True, northern_temps=True, southern_temps=True):
-    """
-    Return the list of HadCRUT dataset files to be used/downloaded
-    """
-    # List of the HadCRUT.5.0.1.0 datasets we want to plot.
-    # Note: We can dump a NetCFG file using the command:
-    #       $ ncdump -h <ncfile>
-    if time_series not in ["annual", "monthly"]:
-        raise Exception("Unsupported time series \"{}\"".format(time_series))
+    def download_datasets(self):
+        if self._enable_global:
+            self._wget_dataset_file(self._global_filename)
+        if self._enable_northern:
+            self._wget_dataset_file(self._northern_hemisphere_filename)
+        if self._enable_southern:
+            self._wget_dataset_file(self._southern_hemisphere_filename)
 
-    dataset_version = "5.0.1.0"
-    file_prefix = "HadCRUT.{}.analysis.summary_series".format(dataset_version)
-    datasets = {}
+    def load_datasets(self):
+        """Load all the netCDFv4 datasets"""
 
-    if global_temps:
-        datasets["Global"] = {
-            "filename": "{}.global.{}.nc".format(file_prefix, time_series)
-        }
-    if northern_temps:
-        datasets["Northern Hemisphere"] = {
-            "filename": \
-            "{}.northern_hemisphere.{}.nc".format(file_prefix, time_series)
-        }
-    if southern_temps:
-        datasets["Southern Hemisphere"] = {
-            "filename": \
-            "{}.southern_hemisphere.{}.nc".format(file_prefix, time_series)
-        }
+        def dataset_load(dataset_filename):
+            """Load the data provided by the netCDFv4 file 'dataset_filename'"""
+            dataset = nc.Dataset(dataset_filename)
+            return {
+                "dimensions": dataset.dimensions,
+                "metadata"  : dataset.__dict__,
+                "variables" : dataset.variables,
+            }
 
-    return datasets
+        if self._enable_global:
+            self._datasets["Global"] = dataset_load(self._global_filename)
+        if self._enable_northern:
+            self._datasets["Northern Hemisphere"] = \
+                dataset_load(self._northern_hemisphere_filename)
+        if self._enable_southern:
+            self._datasets["Southern Hemisphere"] = \
+                dataset_load(self._southern_hemisphere_filename)
 
-def dataset_annual(global_temps=True, northern_temps=True, southern_temps=True):
-    """Return the list of HadCRUT annual dataset files to be used/downloaded"""
-    return dataset("annual", global_temps, northern_temps, southern_temps)
+    @staticmethod
+    def _hadcrut5_data_url(filename):
+        site = "https://www.metoffice.gov.uk"
+        path = "/hadobs/hadcrut5/data/current/analysis/diagnostics/"
+        url = "{}{}{}".format(site, path, filename)
+        return url
 
-def dataset_current_anomaly(temperatures):
-    """Return the current anomaly"""
-    return temperatures[-1]
+    def _wget_dataset_file(self, filename):
+        """Download a netCDFv4 HadCRUT5 file if not already found locally"""
+        try:
+            with open(filename) as dataset:
+                if self._verbose:
+                    print("Using the local dataset file: {}".format(filename))
+        except IOError:
+            if self._verbose:
+                print ("Downloading {} ...".format(filename))
 
-def dataset_max_anomaly(temperatures):
-    """Return the maximum anomaly with respect to 'temperatures'"""
-    return np.max(temperatures)
+            url_dataset = self._hadcrut5_data_url(filename)
+            response = requests.get(url_dataset, stream=True)
+            # Throw an error for bad status codes
+            response.raise_for_status()
 
-def dataset_smoother(years, temperatures, chunksize):
-    """Make the lines smoother by using {chunksize}-year means"""
-    data_range = range((len(years) + chunksize - 1) // chunksize)
-    subset_years = [years[i*chunksize] for i in data_range]
-    subset_temperatures = [
-        np.mean(temperatures[i*chunksize:(i+1)*chunksize]) for i in data_range]
-    return subset_years, subset_temperatures
+            with open(filename, 'wb') as handle:
+                for block in response.iter_content(1024):
+                    handle.write(block)
 
-def is_monthly_dataset(temperatures):
-    """
-    Return True if the given dataset has monthly records and False otherwise
-    (annual records)
-    """
-    # for example:
-    # - 172 annual records
-    # - 2063 monthly records (2063 // 12 = 171)
-    return (len(temperatures) // 12) > 100
+    @property
+    def datasets(self):
+        return self._datasets
+
+    def dataset_mean(self, datatype):
+        return self._datasets[datatype]["variables"]["tas_mean"][:]
+
+    def dataset_normalize(self, tas_mean, norm_temp=None):
+        """
+        Produce the temperature means relative to the given period
+        If the norm_temp is not set it's calculated according to the given
+        period. Otherwise the value is used as normalization factor.
+        """
+        if self._period == "1961-1990":
+            # No changes required:
+            # the original dataset is based on the reference period 1961-1990
+            return (tas_mean, 0)
+
+        m = 12 if self.is_monthly_dataset else 1
+
+        if not norm_temp:
+            if self._period == "1850-1900":
+                # The dataset starts from 1850-01-01 00:00:00
+                # so we calculate the mean of the first 50 years
+                norm_temp = np.mean(tas_mean[:50*m])
+            elif self._period == "1880-1920":
+                # We have to skip the first 30 years here
+                norm_temp = np.mean(tas_mean[30*m:41*m])
+            else:
+                # should never happen...
+                raise Exception(("Unsupported period \"{}\""
+                                 .format(self._period)))
+
+        tas_mean_normalized = [
+            round(t - norm_temp, 8) for t in tas_mean[:]]
+
+        return tas_mean_normalized, norm_temp
+
+    def dataset_range(self, datatype):
+        tas_lower = self._datasets[datatype]["variables"]["tas_lower"][:]
+        tas_upper = self._datasets[datatype]["variables"]["tas_upper"][:]
+        return (tas_lower, tas_upper)
+
+    @property
+    def is_monthly_dataset(self):
+        return False if self._datatype == "annual" else True
+
+    @property
+    def global_filename(self):
+        return self._global_filename
+    @property
+    def northern_hemisphere_filename(self):
+        return self._northern_hemisphere_filename
+    @property
+    def southern_hemisphere_filename(self):
+        return self._southern_hemisphere_filename
+
+    @property
+    def verbose(self):
+        """Return the verbosity status"""
+        return self._verbose

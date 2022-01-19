@@ -71,36 +71,66 @@ def parse_args():
 
     return parser.parse_args()
 
-def plotline(datasets, outfile, period, time_series,
-             chunksize, annotate, verbose):
+def dataset_current_anomaly(temperatures):
+    """Return the current anomaly"""
+    return temperatures[-1]
+
+def dataset_max_anomaly(temperatures):
+    """Return the maximum anomaly with respect to 'temperatures'"""
+    return np.max(temperatures)
+
+def dataset_smoother(years, temperatures, chunksize):
+    """Make the lines smoother by using {chunksize}-year means"""
+    data_range = range((len(years) + chunksize - 1) // chunksize)
+    subset_years = [years[i*chunksize] for i in data_range]
+    subset_temperatures = [
+        np.mean(temperatures[i*chunksize:(i+1)*chunksize]) for i in data_range
+    ]
+
+    return subset_years, subset_temperatures
+
+def plotline(period, time_series,
+             plot_global, plot_northern, plot_southern,
+             chunksize, annotate, outfile, verbose):
+
+    hc5 = hadcrut5.HadCRUT5(period=period,
+                            datatype=time_series,
+                            enable_global=plot_global,
+                            enable_northern=plot_northern,
+                            enable_southern=plot_southern,
+                            verbose=verbose)
+
+    hc5.download_datasets()
+    hc5.load_datasets()
+    datasets = hc5.datasets
+
     mpl.style.use("seaborn-notebook")
     anomaly_current = {}
     anomaly_max = {}
 
     for item in datasets:
-        tas_mean  = datasets[item]["variables"]["tas_mean"][:]
-        tas_lower = datasets[item]["variables"]["tas_lower"][:]
-        tas_upper = datasets[item]["variables"]["tas_upper"][:]
+        tas_mean = hc5.dataset_mean(item)
+        tas_lower, tas_upper = hc5.dataset_range(item)
+        is_monthly = hc5.is_monthly_dataset
 
-        is_monthly = hadcrut5.is_monthly_dataset(tas_mean)
         factor = 1/12 if is_monthly else 1
-        years = [y * factor + 1850 for y in range(len(tas_mean))]
+        years = [1850 + (y * factor) for y in range(len(tas_mean))]
         if verbose:
             print("years: \\\n{}".format(np.array(years)))
             print("temperatures ({}): \\\n{}".format(item, tas_mean))
 
-        mean, norm_temp = hadcrut5.dataset_normalize(tas_mean, period)
+        mean, norm_temp = hc5.dataset_normalize(tas_mean)
         if verbose:
             print(("The mean anomaly ({0}) in {1} is about: {2:.8f}°C"
                    .format(item, period, norm_temp)))
             print(("tas_mean ({}) relative to {}: \\\n{}"
                    .format(item, period, np.array(mean))))
 
-        lower, _ = hadcrut5.dataset_normalize(tas_lower, period, norm_temp)
-        upper, _ = hadcrut5.dataset_normalize(tas_upper, period, norm_temp)
+        lower, _ = hc5.dataset_normalize(tas_lower, norm_temp)
+        upper, _ = hc5.dataset_normalize(tas_upper, norm_temp)
 
         if chunksize > 1:
-            years, mean = hadcrut5.dataset_smoother(years, mean, chunksize)
+            years, mean = dataset_smoother(years, mean, chunksize)
             if verbose:
                 print("years: \\\n{}".format(np.array(years)))
                 print("temperatures ({}): \\\n{}".format(item, mean))
@@ -108,8 +138,8 @@ def plotline(datasets, outfile, period, time_series,
         else:
             plt.fill_between(years, lower, upper, color="lightgray")
 
-            anomaly_current[item] = hadcrut5.dataset_current_anomaly(mean)
-            anomaly_max[item] = hadcrut5.dataset_max_anomaly(mean)
+            anomaly_current[item] = dataset_current_anomaly(mean)
+            anomaly_max[item] = dataset_max_anomaly(mean)
             if verbose:
                 print("Current anomalies: {}".format(anomaly_current[item]))
                 print("Max anomalies: {}".format(anomaly_max[item]))
@@ -173,32 +203,22 @@ def plotline(datasets, outfile, period, time_series,
 
 def main():
     args = parse_args()
-    if args.period not in ["1850-1900", "1880-1920", "1961-1990"]:
-        raise Exception("Unsupported reference period: {}".format(args.period))
 
-    if args.time_series not in ["annual", "monthly"]:
-        raise Exception("Unsupported time series \"{}\"".format(time_series))
-
-    if args.plot_global or args.plot_northern or args.plot_southern:
-        datasets = hadcrut5.dataset(args.time_series,
-                                    args.plot_global,
-                                    args.plot_northern,
-                                    args.plot_southern)
+    if not (args.plot_global or args.plot_northern or args.plot_southern):
+        plot_global = plot_northern = plot_southern = True
     else:
-        datasets = hadcrut5.dataset(args.time_series)
+        plot_global = args.plot_global
+        plot_northern = args.plot_northern
+        plot_southern = args.plot_southern
 
-    for item in datasets:
-        datafile = datasets[item]["filename"]
-        hadcrut5.dataset_get(datafile, args.verbose)
-        data = hadcrut5.dataset_load(datafile)
-        datasets[item].update(data)
-
-    plotline(datasets,
-             args.outfile,
-             args.period,
+    plotline(args.period,
              args.time_series,
+             plot_global,
+             plot_northern,
+             plot_southern,
              int(args.smoother) if args.smoother else 1,
              int(args.annotate) if args.annotate else 1,
+             args.outfile,
              args.verbose)
 
 if __name__ == "__main__":

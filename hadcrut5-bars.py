@@ -36,9 +36,20 @@ def parse_args():
 
     return parser.parse_args()
 
-def plotbar(dataset, outfile, period, verbose):
+def plotbar(period, outfile, verbose):
     def major_formatter(x, pos):
         return f'{x:.1f}' if x >= 0 else ''
+
+    hc5 = hadcrut5.HadCRUT5(period=period,
+                            datatype="annual",
+                            enable_global=True,
+                            enable_northern=False,
+                            enable_southern=False,
+                            verbose=verbose)
+
+    hc5.download_datasets()
+    hc5.load_datasets()
+    datasets = hc5.datasets
 
     bar_width = 0.7
     basefont = {
@@ -52,13 +63,13 @@ def plotbar(dataset, outfile, period, verbose):
     plt.style.use("dark_background")
     fix, ax = plt.subplots()
 
-    tas_mean = dataset["variables"]["tas_mean"][:]
+    tas_mean = hc5.dataset_mean("Global")
     years = [y + 1850 for y in range(len(tas_mean))]
     if verbose:
         print("years: \\\n{}".format(np.array(years)))
         print("temperatures: \\\n{}".format(tas_mean))
 
-    mean, norm_temp = hadcrut5.dataset_normalize(tas_mean, period)
+    mean, norm_temp = hc5.dataset_normalize(tas_mean)
     if verbose:
         print(("The mean anomaly in {0} is about: {1:.8f}°C"
                .format(period, norm_temp)))
@@ -112,22 +123,9 @@ def plotbar(dataset, outfile, period, verbose):
 
 def main():
     args = parse_args()
-    if args.period not in ["1850-1900", "1880-1920", "1961-1990"]:
-        raise Exception(("Unsupported reference period: {}"
-                         .format(args.period)))
 
-    datasets = hadcrut5.dataset_annual(northern_temps=False,
-                                       southern_temps=False)
-    global_dataset = datasets["Global"]
-
-    datafile = global_dataset["filename"]
-    hadcrut5.dataset_get(datafile, args.verbose)
-    data = hadcrut5.dataset_load(datafile)
-    global_dataset.update(data)
-
-    plotbar(global_dataset,
+    plotbar(args.period,
             args.outfile,
-            args.period,
             args.verbose)
 
 if __name__ == "__main__":
