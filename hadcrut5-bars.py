@@ -1,8 +1,10 @@
 #!/usr/bin/python3
-
-# Parse and plot the HadCRUT5 temperature datasets
 # Copyright (c) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+"""
+Display a bar plot of the HadCRUT5 Global temperature dataset.
+"""
 
 import matplotlib.pyplot as plt
 import matplotlib.colors
@@ -11,7 +13,7 @@ import numpy as np
 import hadcrut5lib as hadcrut5
 
 def parse_args():
-    """This function parses and return arguments passed in """
+    """This function parses and return arguments passed in"""
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
        "%(prog)s",
@@ -37,17 +39,20 @@ def parse_args():
     return parser.parse_args()
 
 def plotbar(period, outfile, verbose):
+    """
+    Create a bar plot for the specified period and diplay it or save it to file
+    if outfile is set
+    """
+    # pylint: disable=W0613
     def major_formatter(x, pos):
         return f'{x:.1f}' if x >= 0 else ''
+    # pylint: enable=W0613
 
     hc5 = hadcrut5.HadCRUT5(period=period,
-                            enable_northern=False,
-                            enable_southern=False,
                             verbose=verbose)
 
     hc5.download_datasets()
     hc5.load_datasets()
-    datasets = hc5.datasets
 
     bar_width = 0.7
     basefont = {
@@ -59,10 +64,10 @@ def plotbar(period, outfile, verbose):
     fontxs = { **basefont, "size": 12 }
 
     plt.style.use("dark_background")
-    fix, ax = plt.subplots()
+    _, ax = plt.subplots()
 
-    tas_mean = hc5.dataset_mean("Global")
-    years = [y + 1850 for y in range(len(tas_mean))]
+    tas_mean = hc5.dataset_mean()
+    years = [1850 + y for y in range(len(tas_mean))]
     if verbose:
         print("years: \\\n{}".format(np.array(years)))
         print("temperatures: \\\n{}".format(tas_mean))
@@ -116,9 +121,10 @@ def plotbar(period, outfile, verbose):
     if outfile:
         fig.savefig(outfile, dpi=80, bbox_inches='tight')
         plt.close(fig)
+    else:
+        plt.show()
 
-    plt.show()
-
+# pylint: disable=C0116
 def main():
     args = parse_args()
 
@@ -126,5 +132,4 @@ def main():
             args.outfile,
             args.verbose)
 
-if __name__ == "__main__":
-    main()
+main()

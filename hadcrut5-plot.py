@@ -1,8 +1,10 @@
 #!/usr/bin/python3
-
-# Parse and plot the HadCRUT5 temperature datasets
 # Copyright (c) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+"""
+Display a plot of the HadCRUT5 temperature dataset.
+"""
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -11,7 +13,7 @@ import numpy as np
 import hadcrut5lib as hadcrut5
 
 def parse_args():
-    """This function parses and return arguments passed in """
+    """This function parses and return arguments passed in"""
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
        "%(prog)s",
@@ -25,7 +27,8 @@ def parse_args():
     parser.add_argument(
         "-a", "--annotate",
         action="store", dest="annotate", default="1",
-        help="add temperature annotations (0: no annotations, 1 (default): bottom only, 2: all ones")
+        help="add temperature annotations (0: no annotations, 1 (default): "
+             "bottom only, 2: all ones")
     parser.add_argument(
         "-f", "--outfile",
         action="store",
@@ -89,15 +92,20 @@ def dataset_smoother(years, temperatures, chunksize):
 
     return subset_years, subset_temperatures
 
-def plotline(period, time_series,
-             plot_global, plot_northern, plot_southern,
-             chunksize, annotate, outfile, verbose):
-
+def plotline(period,
+             time_series,
+             regions,
+             chunksize,
+             annotate,
+             outfile,
+             verbose):
+    """
+    Create a plot for the specified period and arguments and diplay it or save
+    it to file if outfile is set
+    """
     hc5 = hadcrut5.HadCRUT5(period=period,
                             datatype=time_series,
-                            enable_global=plot_global,
-                            enable_northern=plot_northern,
-                            enable_southern=plot_southern,
+                            regions=regions,
                             verbose=verbose)
 
     hc5.download_datasets()
@@ -111,9 +119,10 @@ def plotline(period, time_series,
     for item in datasets:
         tas_mean = hc5.dataset_mean(item)
         tas_lower, tas_upper = hc5.dataset_range(item)
-        is_monthly = hc5.is_monthly_dataset
 
+        is_monthly = hc5.is_monthly_dataset
         factor = 1/12 if is_monthly else 1
+
         years = [1850 + (y * factor) for y in range(len(tas_mean))]
         if verbose:
             print("years: \\\n{}".format(np.array(years)))
@@ -177,7 +186,7 @@ def plotline(period, time_series,
         current = anomaly_current.get('Global')
         maximum = anomaly_max.get('Global')
         if annotate > 0 and current and maximum:
-            ax = plt.gca()
+            plt.gca()
             plt.annotate(("current global anomaly: {0:+.2f}°C, max: {1:+.2f}°C"
                           .format(current, maximum)),
                          xy=(0.98, 0.03),
@@ -201,6 +210,7 @@ def plotline(period, time_series,
     else:
         plt.show()
 
+# pylint: disable=C0116
 def main():
     args = parse_args()
 
@@ -211,15 +221,14 @@ def main():
         plot_northern = args.plot_northern
         plot_southern = args.plot_southern
 
+    regions = (plot_global, plot_northern, plot_southern)
+
     plotline(args.period,
              args.time_series,
-             plot_global,
-             plot_northern,
-             plot_southern,
+             regions,
              int(args.smoother) if args.smoother else 1,
              int(args.annotate) if args.annotate else 1,
              args.outfile,
              args.verbose)
 
-if __name__ == "__main__":
-    main()
+main()
