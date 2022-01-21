@@ -36,6 +36,10 @@ def argparser(descr, examples):
                description = copyleft(descr),
                epilog = "examples:\n  " + "\n  ".join(examples))
 
+def dprint(verbose, message):
+    """Print a message when in verbose mode only"""
+    if verbose:
+        print(message)
 
 # pylint: disable=R0902
 class HadCRUT5:
@@ -193,6 +197,11 @@ class HadCRUT5:
             round(t - norm_temp, 8) for t in tas_mean[:]]
 
         return tas_mean_normalized, norm_temp
+
+    @property
+    def dataset_period(self):
+        """Return the dataset period as a string"""
+        return self._period
 
     def dataset_range(self, datatype):
         """Return the range tas_lower..tas_upper for the given datatype"""

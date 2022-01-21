@@ -10,7 +10,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
-import hadcrut5lib as hadcrut5
+from hadcrut5lib import argparser, dprint, HadCRUT5
 
 def parse_args():
     """This function parses and return arguments passed in"""
@@ -23,7 +23,7 @@ def parse_args():
        "%(prog)s --period \"1880-1920\" --outfile HadCRUT5-1880-1920.png",
        "%(prog)s --period \"1880-1920\" --time-series monthly --global"]
 
-    parser = hadcrut5.argparser(descr, examples)
+    parser = argparser(descr, examples)
     parser.add_argument(
         "-a", "--annotate",
         action="store", dest="annotate", default="1",
@@ -92,22 +92,11 @@ def dataset_smoother(years, temperatures, chunksize):
 
     return subset_years, subset_temperatures
 
-def plotline(period,
-             time_series,
-             regions,
-             chunksize,
-             annotate,
-             outfile,
-             verbose):
+def plotline(hc5, chunksize, annotate, outfile, verbose):
     """
     Create a plot for the specified period and arguments and diplay it or save
     it to file if outfile is set
     """
-    hc5 = hadcrut5.HadCRUT5(period=period,
-                            datatype=time_series,
-                            regions=regions,
-                            verbose=verbose)
-
     hc5.download_datasets()
     hc5.load_datasets()
     datasets = hc5.datasets
@@ -121,33 +110,30 @@ def plotline(period,
         tas_lower, tas_upper = hc5.dataset_range(item)
 
         years = hc5.dataset_years()
-        if verbose:
-            print("temperatures ({}): \\\n{}".format(item, tas_mean))
+        dprint(verbose, "temperatures ({}): \\\n{}".format(item, tas_mean))
 
         mean, norm_temp = hc5.dataset_normalize(tas_mean)
-        if verbose:
-            print(("The mean anomaly ({0}) in {1} is about: {2:.8f}°C"
-                   .format(item, period, norm_temp)))
-            print(("tas_mean ({}) relative to {}: \\\n{}"
-                   .format(item, period, np.array(mean))))
+        dprint(verbose, ("The mean anomaly ({0}) in {1} is about: {2:.8f}°C"
+                         .format(item, hc5.dataset_period, norm_temp)))
+        dprint(verbose, ("tas_mean ({}) relative to {}: \\\n{}"
+                         .format(item, hc5.dataset_period, np.array(mean))))
 
         lower, _ = hc5.dataset_normalize(tas_lower, norm_temp)
         upper, _ = hc5.dataset_normalize(tas_upper, norm_temp)
 
         if chunksize > 1:
             years, mean = dataset_smoother(years, mean, chunksize)
-            if verbose:
-                print("years: \\\n{}".format(np.array(years)))
-                print("temperatures ({}): \\\n{}".format(item, mean))
-                print("delta ({}): \\\n{}".format(years[-1], mean[-1]))
+            dprint(verbose, "years: \\\n{}".format(np.array(years)))
+            dprint(verbose, "temperatures ({}): \\\n{}".format(item, mean))
+            dprint(verbose, "delta ({}): \\\n{}".format(years[-1], mean[-1]))
         else:
             plt.fill_between(years, lower, upper, color="lightgray")
 
             anomaly_current[item] = dataset_current_anomaly(mean)
             anomaly_max[item] = dataset_max_anomaly(mean)
-            if verbose:
-                print("Current anomalies: {}".format(anomaly_current[item]))
-                print("Max anomalies: {}".format(anomaly_max[item]))
+            dprint(verbose, ("Current anomalies: {}"
+                             .format(anomaly_current[item])))
+            dprint(verbose, "Max anomalies: {}".format(anomaly_max[item]))
 
             if annotate > 1:
                 plt.annotate("{0:.2f}°C".format(anomaly_current[item]),
@@ -171,8 +157,9 @@ def plotline(period,
     plt.hlines(0, np.min(years), np.max(years),
                colors='gray', linestyles='dotted')
 
-    plt.title(
-        "HadCRUT5: land and sea temperature anomalies relative to {}".format(period))
+    plt.title((
+        "HadCRUT5: land and sea temperature anomalies relative to {}"
+        .format(hc5.dataset_period)))
     plt.xlabel("year", fontsize=10)
 
     ylabel = ("{} Temperature Anomalies in °C"
@@ -220,9 +207,12 @@ def main():
 
     regions = (plot_global, plot_northern, plot_southern)
 
-    plotline(args.period,
-             args.time_series,
-             regions,
+    hc5 = HadCRUT5(period=args.period,
+                   datatype=args.time_series,
+                   regions=regions,
+                   verbose=args.verbose)
+
+    plotline(hc5,
              int(args.smoother) if args.smoother else 1,
              int(args.annotate) if args.annotate else 1,
              args.outfile,

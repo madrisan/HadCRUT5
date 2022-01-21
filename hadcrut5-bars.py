@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors
 import numpy as np
 
-import hadcrut5lib as hadcrut5
+from hadcrut5lib import argparser, dprint, HadCRUT5
 
 def parse_args():
     """This function parses and return arguments passed in"""
@@ -21,7 +21,7 @@ def parse_args():
        "%(prog)s --period \"1880-1920\"",
        "%(prog)s --outfile HadCRUT5-global.png"]
 
-    parser = hadcrut5.argparser(descr, examples)
+    parser = argparser(descr, examples)
     parser.add_argument(
         "-f", "--outfile",
         action="store", dest="outfile",
@@ -48,9 +48,7 @@ def plotbar(period, outfile, verbose):
         return f'{x:.1f}' if x >= 0 else ''
     # pylint: enable=W0613
 
-    hc5 = hadcrut5.HadCRUT5(period=period,
-                            verbose=verbose)
-
+    hc5 = HadCRUT5(period=period, verbose=verbose)
     hc5.download_datasets()
     hc5.load_datasets()
 
@@ -68,15 +66,13 @@ def plotbar(period, outfile, verbose):
 
     tas_mean = hc5.dataset_mean()
     years = hc5.dataset_years()
-    if verbose:
-        print("temperatures: \\\n{}".format(tas_mean))
+    dprint(verbose, "temperatures: \\\n{}".format(tas_mean))
 
     mean, norm_temp = hc5.dataset_normalize(tas_mean)
-    if verbose:
-        print(("The mean anomaly in {0} is about: {1:.8f}°C"
-               .format(period, norm_temp)))
-        print(("tas_mean relative to {}: \\\n{}"
-               .format(period, np.array(mean))))
+    dprint(verbose, (("The mean anomaly in {0} is about: {1:.8f}°C"
+                      .format(period, norm_temp))))
+    dprint(verbose, ("tas_mean relative to {}: \\\n{}"
+                     .format(period, np.array(mean))))
 
     cmap = plt.cm.jet # or plt.cm.bwr
     norm = matplotlib.colors.Normalize(vmin=-1, vmax=max(mean))
