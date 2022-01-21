@@ -52,7 +52,7 @@ class HadCRUT5:
     _DEFAULT_PERIOD = "1961-1990"
     _VALID_PERIODS = [_DEFAULT_PERIOD, "1850-1900", "1880-1920"]
 
-    _GLOBAL_REGION = "Global"
+    GLOBAL_REGION = "Global"
 
     def __init__(self,
                  period = _DEFAULT_PERIOD,
@@ -151,7 +151,12 @@ class HadCRUT5:
         """Return the HadCRUT5 loaded datasets"""
         return self._datasets
 
-    def dataset_mean(self, region=_GLOBAL_REGION):
+    @property
+    def dataset_datatype(self):
+        """Return the datatype string"""
+        return self._datatype
+
+    def dataset_mean(self, region=GLOBAL_REGION):
         """
         Return the data 'tas_mean' for the 'region' or the default region
         when not specified

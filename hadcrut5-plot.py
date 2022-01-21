@@ -161,10 +161,10 @@ def plotline(period,
                             }
                 )
 
-        is_monthly = hc5.is_monthly_dataset
+        linewidth = 1 if hc5.is_monthly_dataset and chunksize < 2 else 2
         plt.plot(years,
                  mean,
-                 linewidth=(1 if is_monthly and chunksize < 2 else 2),
+                 linewidth=linewidth,
                  markersize=12,
                  label=item)
 
@@ -176,12 +176,12 @@ def plotline(period,
     plt.xlabel("year", fontsize=10)
 
     ylabel = ("{} Temperature Anomalies in °C"
-              .format("Monthly" if is_monthly else "Annual"))
+              .format(hc5.dataset_datatype.capitalize()))
     if chunksize > 1:
         ylabel += " ({}-year averages)".format(chunksize)
     else:
-        current = anomaly_current.get('Global')
-        maximum = anomaly_max.get('Global')
+        current = anomaly_current.get(hc5.GLOBAL_REGION)
+        maximum = anomaly_max.get(hc5.GLOBAL_REGION)
         if annotate > 0 and current and maximum:
             plt.gca()
             plt.annotate(("current global anomaly: {0:+.2f}°C, max: {1:+.2f}°C"
