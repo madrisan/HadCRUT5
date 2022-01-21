@@ -195,6 +195,16 @@ class HadCRUT5:
         tas_upper = self._datasets[datatype]["variables"]["tas_upper"][:]
         return (tas_lower, tas_upper)
 
+    def dataset_years(self):
+        """Return an array of years corresponding of the loaded dataset"""
+        tas_mean = self.dataset_mean()
+        factor = 1/12 if self.is_monthly_dataset else 1
+        years = [1850 + (y * factor) for y in range(len(tas_mean))]
+        if self._verbose:
+            print("years: \\\n{}".format(np.array(years)))
+
+        return years
+
     @property
     def is_monthly_dataset(self):
         """

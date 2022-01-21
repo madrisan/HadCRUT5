@@ -120,12 +120,8 @@ def plotline(period,
         tas_mean = hc5.dataset_mean(item)
         tas_lower, tas_upper = hc5.dataset_range(item)
 
-        is_monthly = hc5.is_monthly_dataset
-        factor = 1/12 if is_monthly else 1
-
-        years = [1850 + (y * factor) for y in range(len(tas_mean))]
+        years = hc5.dataset_years()
         if verbose:
-            print("years: \\\n{}".format(np.array(years)))
             print("temperatures ({}): \\\n{}".format(item, tas_mean))
 
         mean, norm_temp = hc5.dataset_normalize(tas_mean)
@@ -165,6 +161,7 @@ def plotline(period,
                             }
                 )
 
+        is_monthly = hc5.is_monthly_dataset
         plt.plot(years,
                  mean,
                  linewidth=(1 if is_monthly and chunksize < 2 else 2),

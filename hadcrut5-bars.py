@@ -67,9 +67,8 @@ def plotbar(period, outfile, verbose):
     _, ax = plt.subplots()
 
     tas_mean = hc5.dataset_mean()
-    years = [1850 + y for y in range(len(tas_mean))]
+    years = hc5.dataset_years()
     if verbose:
-        print("years: \\\n{}".format(np.array(years)))
         print("temperatures: \\\n{}".format(tas_mean))
 
     mean, norm_temp = hc5.dataset_normalize(tas_mean)
