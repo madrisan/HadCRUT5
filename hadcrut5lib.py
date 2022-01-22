@@ -59,10 +59,11 @@ class HadCRUT5:
     GLOBAL_REGION = "Global"
 
     def __init__(self,
-                 period = _DEFAULT_PERIOD,
-                 datatype = _DEFAULT_DATATYPE,
-                 regions = (True, False, False),
-                 verbose = False):
+                 period=_DEFAULT_PERIOD,
+                 datatype=_DEFAULT_DATATYPE,
+                 regions=(True, False, False),
+                 smoother=1,
+                 verbose=False):
 
         enable_global, enable_northern, enable_southern = regions
 
@@ -73,11 +74,14 @@ class HadCRUT5:
             raise Exception(("Unsupported reference period: {}"
                              .format(period)))
 
-        # will be populated by load_datasets()
+        # will be populated by datasets_load()
         self._datasets = {}
+        # will be populated by datasets_normalize()
+        self._datasets_normalized = {}
 
         self._datatype = datatype
         self._period = period
+        self._smoother = smoother
         self._verbose = verbose
 
         self._enable_global = enable_global
@@ -94,16 +98,17 @@ class HadCRUT5:
             "HadCRUT.{}.analysis.summary_series.southern_hemisphere.{}.nc"
             .format(self._DATASET_VERSION, datatype))
 
-    def download_datasets(self):
+    def datasets_download(self):
         """Download the required HadCRUT5 datasets"""
-        if self._enable_global:
-            self._wget_dataset_file(self._global_filename)
+        # The Global dataset need to be always download, because it's used
+        # in the temperatures normalization step
+        self._wget_dataset_file(self._global_filename)
         if self._enable_northern:
             self._wget_dataset_file(self._northern_hemisphere_filename)
         if self._enable_southern:
             self._wget_dataset_file(self._southern_hemisphere_filename)
 
-    def load_datasets(self):
+    def datasets_load(self):
         """Load all the netCDFv4 datasets"""
 
         def dataset_load(dataset_filename):
@@ -123,6 +128,69 @@ class HadCRUT5:
         if self._enable_southern:
             self._datasets["Southern Hemisphere"] = \
                 dataset_load(self._southern_hemisphere_filename)
+
+    def datasets_normalize(self):
+        """
+        Normalize the temperature means to the required time period.
+        See _VALID_PERIODS.
+        Return a tuple containing lower, mean, and upper temperatures.
+        """
+        for region in self._datasets:
+            lower = self._datasets[region]["variables"]["tas_lower"]
+            mean = self._datasets[region]["variables"]["tas_mean"]
+            upper = self._datasets[region]["variables"]["tas_upper"]
+
+            self._datasets_normalized[region] = {
+                "lower": np.array(lower),
+                "mean": np.array(mean),
+                "upper": np.array(upper)
+            }
+
+            dprint(self._verbose,
+                   "dataset ({}): mean \\\n{}".format(region, mean))
+
+        if self._period == "1961-1990":
+            # No changes required: the original dataset is based on the
+            # reference period 1961-1990
+            return
+
+        # The Global dataset load can be disabled in the command-line but
+        # it's necessary here
+        ds_global = nc_Dataset(self._global_filename)
+        tas_mean = ds_global.variables["tas_mean"][:]
+        factor = 12 if self.is_monthly_dataset else 1
+
+        if self._period == "1850-1900":
+            # The dataset starts from 1850-01-01 00:00:00
+            # so we calculate the mean of the first 50 years
+            norm_temp = np.mean(tas_mean[:50*factor])
+        elif self._period == "1880-1920":
+            # We have to skip the first 30 years here
+            norm_temp = np.mean(tas_mean[30*factor:41*factor])
+        else:
+            # this should never happen...
+            raise Exception(("Unsupported period \"{}\"".format(self._period)))
+
+        dprint(self._verbose, ("The mean anomaly in {0} is about {1:.8f}°C"
+                               .format(self._period, norm_temp)))
+
+        for region in self._datasets_normalized:
+            lower = self._datasets_normalized[region]["lower"] - norm_temp
+            mean = self._datasets_normalized[region]["mean"] - norm_temp
+            upper = self._datasets_normalized[region]["upper"] - norm_temp
+
+            self._datasets_normalized[region] = {
+                "lower": lower,
+                "mean" : mean,
+                "upper": upper,
+            }
+
+            dprint(self._verbose,
+                   "normalized dataset ({}): mean \\\n{}".format(region, mean))
+
+    def datasets_regions(self):
+        """Return the dataset regions set by the user at command-line"""
+        return self._datasets.keys()
 
     @staticmethod
     def _hadcrut5_data_url(filename):
@@ -151,72 +219,28 @@ class HadCRUT5:
                     handle.write(block)
 
     @property
-    def datasets(self):
-        """Return the HadCRUT5 loaded datasets"""
-        return self._datasets
-
-    @property
     def dataset_datatype(self):
         """Return the datatype string"""
         return self._datatype
 
-    def dataset_mean(self, region=GLOBAL_REGION):
-        """
-        Return the data 'tas_mean' for the 'region' or the default region
-        when not specified
-        """
-        return self._datasets[region]["variables"]["tas_mean"][:]
-
-    def dataset_normalize(self, tas_mean, norm_temp=None):
-        """
-        Produce the temperature means relative to the given period
-        If the norm_temp is not set it's calculated according to the given
-        period. Otherwise the value is used as normalization factor
-        """
-        if self._period == "1961-1990":
-            # No changes required:
-            # the original dataset is based on the reference period 1961-1990
-            return (tas_mean, 0)
-
-        factor = 12 if self.is_monthly_dataset else 1
-
-        if not norm_temp:
-            if self._period == "1850-1900":
-                # The dataset starts from 1850-01-01 00:00:00
-                # so we calculate the mean of the first 50 years
-                norm_temp = np.mean(tas_mean[:50*factor])
-            elif self._period == "1880-1920":
-                # We have to skip the first 30 years here
-                norm_temp = np.mean(tas_mean[30*factor:41*factor])
-            else:
-                # should never happen...
-                raise Exception(("Unsupported period \"{}\""
-                                 .format(self._period)))
-
-        tas_mean_normalized = [
-            round(t - norm_temp, 8) for t in tas_mean[:]]
-
-        return tas_mean_normalized, norm_temp
+    def dataset_normalized_data(self, region):
+        """Return the dataset data normalized for the specified region"""
+        lower = self._datasets_normalized[region]["lower"]
+        mean = self._datasets_normalized[region]["mean"]
+        upper = self._datasets_normalized[region]["upper"]
+        return (lower, mean, upper)
 
     @property
     def dataset_period(self):
         """Return the dataset period as a string"""
         return self._period
 
-    def dataset_range(self, datatype):
-        """Return the range tas_lower..tas_upper for the given datatype"""
-        tas_lower = self._datasets[datatype]["variables"]["tas_lower"][:]
-        tas_upper = self._datasets[datatype]["variables"]["tas_upper"][:]
-        return (tas_lower, tas_upper)
-
     def dataset_years(self):
         """Return an array of years corresponding of the loaded dataset"""
-        tas_mean = self.dataset_mean()
+        mean = self._datasets[self.GLOBAL_REGION]["variables"]["tas_mean"][:]
         factor = 1/12 if self.is_monthly_dataset else 1
-        years = [1850 + (y * factor) for y in range(len(tas_mean))]
-        if self._verbose:
-            print("years: \\\n{}".format(np.array(years)))
-
+        years = [1850 + (y * factor) for y in range(len(mean))]
+        dprint(self._verbose, "years: \\\n{}".format(np.array(years)))
         return years
 
     @property
@@ -226,21 +250,3 @@ class HadCRUT5:
         False otherwise
         """
         return self._datatype == "monthly"
-
-    @property
-    def global_filename(self):
-        """Return the filename of the Global dataset"""
-        return self._global_filename
-    @property
-    def northern_hemisphere_filename(self):
-        """Return the filename of the Northern dataset"""
-        return self._northern_hemisphere_filename
-    @property
-    def southern_hemisphere_filename(self):
-        """Return the filename of the Southern dataset"""
-        return self._southern_hemisphere_filename
-
-    @property
-    def verbose(self):
-        """Return the verbosity status"""
-        return self._verbose

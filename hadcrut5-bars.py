@@ -8,9 +8,8 @@ Display a bar plot of the HadCRUT5 Global temperature dataset.
 
 import matplotlib.pyplot as plt
 import matplotlib.colors
-import numpy as np
 
-from hadcrut5lib import argparser, dprint, HadCRUT5
+from hadcrut5lib import argparser, HadCRUT5
 
 def parse_args():
     """This function parses and return arguments passed in"""
@@ -49,8 +48,12 @@ def plotbar(period, outfile, verbose):
     # pylint: enable=W0613
 
     hc5 = HadCRUT5(period=period, verbose=verbose)
-    hc5.download_datasets()
-    hc5.load_datasets()
+    hc5.datasets_download()
+    hc5.datasets_load()
+    hc5.datasets_normalize()
+
+    years = hc5.dataset_years()
+    _, mean, _ = hc5.dataset_normalized_data(hc5.GLOBAL_REGION)
 
     bar_width = 0.7
     basefont = {
@@ -63,16 +66,6 @@ def plotbar(period, outfile, verbose):
 
     plt.style.use("dark_background")
     _, ax = plt.subplots()
-
-    tas_mean = hc5.dataset_mean()
-    years = hc5.dataset_years()
-    dprint(verbose, "temperatures: \\\n{}".format(tas_mean))
-
-    mean, norm_temp = hc5.dataset_normalize(tas_mean)
-    dprint(verbose, (("The mean anomaly in {0} is about: {1:.8f}°C"
-                      .format(period, norm_temp))))
-    dprint(verbose, ("tas_mean relative to {}: \\\n{}"
-                     .format(period, np.array(mean))))
 
     cmap = plt.cm.jet # or plt.cm.bwr
     norm = matplotlib.colors.Normalize(vmin=-1, vmax=max(mean))

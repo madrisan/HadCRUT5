@@ -97,47 +97,36 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
     Create a plot for the specified period and arguments and diplay it or save
     it to file if outfile is set
     """
-    hc5.download_datasets()
-    hc5.load_datasets()
-    datasets = hc5.datasets
+    hc5.datasets_download()
+    hc5.datasets_load()
+    hc5.datasets_normalize()
+
+    years = hc5.dataset_years()
 
     mpl.style.use("seaborn-notebook")
     anomaly_current = {}
     anomaly_max = {}
 
-    for item in datasets:
-        tas_mean = hc5.dataset_mean(item)
-        tas_lower, tas_upper = hc5.dataset_range(item)
-
-        years = hc5.dataset_years()
-        dprint(verbose, "temperatures ({}): \\\n{}".format(item, tas_mean))
-
-        mean, norm_temp = hc5.dataset_normalize(tas_mean)
-        dprint(verbose, ("The mean anomaly ({0}) in {1} is about: {2:.8f}°C"
-                         .format(item, hc5.dataset_period, norm_temp)))
-        dprint(verbose, ("tas_mean ({}) relative to {}: \\\n{}"
-                         .format(item, hc5.dataset_period, np.array(mean))))
-
-        lower, _ = hc5.dataset_normalize(tas_lower, norm_temp)
-        upper, _ = hc5.dataset_normalize(tas_upper, norm_temp)
+    for region in hc5.datasets_regions():
+        lower, mean, upper = hc5.dataset_normalized_data(region)
 
         if chunksize > 1:
             years, mean = dataset_smoother(years, mean, chunksize)
             dprint(verbose, "years: \\\n{}".format(np.array(years)))
-            dprint(verbose, "temperatures ({}): \\\n{}".format(item, mean))
+            dprint(verbose, "temperatures ({}): \\\n{}".format(region, mean))
             dprint(verbose, "delta ({}): \\\n{}".format(years[-1], mean[-1]))
         else:
             plt.fill_between(years, lower, upper, color="lightgray")
 
-            anomaly_current[item] = dataset_current_anomaly(mean)
-            anomaly_max[item] = dataset_max_anomaly(mean)
+            anomaly_current[region] = dataset_current_anomaly(mean)
+            anomaly_max[region] = dataset_max_anomaly(mean)
             dprint(verbose, ("Current anomalies: {}"
-                             .format(anomaly_current[item])))
-            dprint(verbose, "Max anomalies: {}".format(anomaly_max[item]))
+                             .format(anomaly_current[region])))
+            dprint(verbose, "Max anomalies: {}".format(anomaly_max[region]))
 
             if annotate > 1:
-                plt.annotate("{0:.2f}°C".format(anomaly_current[item]),
-                             xy=(years[-1]-5, anomaly_current[item]+.05),
+                plt.annotate("{0:.2f}°C".format(anomaly_current[region]),
+                             xy=(years[-1]-5, anomaly_current[region]+.05),
                              fontsize=6,
                              horizontalalignment='left',
                              bbox={
@@ -152,7 +141,7 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
                  mean,
                  linewidth=linewidth,
                  markersize=12,
-                 label=item)
+                 label=region)
 
     plt.hlines(0, np.min(years), np.max(years),
                colors='gray', linestyles='dotted')
@@ -206,14 +195,16 @@ def main():
         plot_southern = args.plot_southern
 
     regions = (plot_global, plot_northern, plot_southern)
+    smoother = int(args.smoother) if args.smoother else 1
 
     hc5 = HadCRUT5(period=args.period,
                    datatype=args.time_series,
                    regions=regions,
+                   smoother=smoother,
                    verbose=args.verbose)
 
     plotline(hc5,
-             int(args.smoother) if args.smoother else 1,
+             smoother,
              int(args.annotate) if args.annotate else 1,
              args.outfile,
              args.verbose)
