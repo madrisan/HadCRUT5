@@ -101,14 +101,13 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
     hc5.datasets_load()
     hc5.datasets_normalize()
 
-    years = hc5.dataset_years()
-
     mpl.style.use("seaborn-notebook")
     anomaly_current = {}
     anomaly_max = {}
 
     for region in hc5.datasets_regions():
         lower, mean, upper = hc5.dataset_normalized_data(region)
+        years = hc5.dataset_years()
 
         if chunksize > 1:
             years, mean = dataset_smoother(years, mean, chunksize)
