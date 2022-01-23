@@ -100,9 +100,8 @@ class HadCRUT5:
 
     def datasets_download(self):
         """Download the required HadCRUT5 datasets"""
-        # The Global dataset need to be always download, because it's used
-        # in the temperatures normalization step
-        self._wget_dataset_file(self._global_filename)
+        if self._enable_global:
+            self._wget_dataset_file(self._global_filename)
         if self._enable_northern:
             self._wget_dataset_file(self._northern_hemisphere_filename)
         if self._enable_southern:
@@ -132,61 +131,54 @@ class HadCRUT5:
     def datasets_normalize(self):
         """
         Normalize the temperature means to the required time period.
-        See _VALID_PERIODS.
-        Return a tuple containing lower, mean, and upper temperatures.
+        Set _datasets_normalized with a tuple containing lower, mean, and upper
+        temperatures for every enabled region
         """
+        def normalization_value(temperatures):
+            """
+            Return the value to be substracted to temperatures in order to
+            obtain a mean-centered dataset for the required period
+            """
+            if self._period == "1961-1990":
+                # No changes required: the original dataset is based on the
+                # reference period 1961-1990
+                return 0
+
+            factor = 12 if self.is_monthly_dataset else 1
+
+            if self._period == "1850-1900":
+                # The dataset starts from 1850-01-01 00:00:00
+                # so we calculate the mean of the first 50 years
+                norm_temp = np.mean(temperatures[:50*factor])
+            elif self._period == "1880-1920":
+                # We have to skip the first 30 years here
+                norm_temp = np.mean(temperatures[30*factor:41*factor])
+            else:
+                # this should never happen...
+                raise Exception(("Unsupported period \"{}\"".format(self._period)))
+
+            dprint(self._verbose, ("The mean anomaly in {0} is about {1:.8f}°C"
+                                   .format(self._period, norm_temp)))
+            return norm_temp
+
         for region in self._datasets:
-            lower = self._datasets[region]["variables"]["tas_lower"]
             mean = self._datasets[region]["variables"]["tas_mean"]
+            dprint(self._verbose,
+                   "dataset ({}): mean \\\n{}".format(region, mean[:]))
+
+            lower = self._datasets[region]["variables"]["tas_lower"]
             upper = self._datasets[region]["variables"]["tas_upper"]
 
-            self._datasets_normalized[region] = {
-                "lower": np.array(lower),
-                "mean": np.array(mean),
-                "upper": np.array(upper)
-            }
-
-            dprint(self._verbose,
-                   "dataset ({}): mean \\\n{}".format(region, mean))
-
-        if self._period == "1961-1990":
-            # No changes required: the original dataset is based on the
-            # reference period 1961-1990
-            return
-
-        # The Global dataset load can be disabled in the command-line but
-        # it's necessary here
-        ds_global = nc_Dataset(self._global_filename)
-        tas_mean = ds_global.variables["tas_mean"][:]
-        factor = 12 if self.is_monthly_dataset else 1
-
-        if self._period == "1850-1900":
-            # The dataset starts from 1850-01-01 00:00:00
-            # so we calculate the mean of the first 50 years
-            norm_temp = np.mean(tas_mean[:50*factor])
-        elif self._period == "1880-1920":
-            # We have to skip the first 30 years here
-            norm_temp = np.mean(tas_mean[30*factor:41*factor])
-        else:
-            # this should never happen...
-            raise Exception(("Unsupported period \"{}\"".format(self._period)))
-
-        dprint(self._verbose, ("The mean anomaly in {0} is about {1:.8f}°C"
-                               .format(self._period, norm_temp)))
-
-        for region in self._datasets_normalized:
-            lower = self._datasets_normalized[region]["lower"] - norm_temp
-            mean = self._datasets_normalized[region]["mean"] - norm_temp
-            upper = self._datasets_normalized[region]["upper"] - norm_temp
+            norm_temp = normalization_value(mean)
 
             self._datasets_normalized[region] = {
-                "lower": lower,
-                "mean" : mean,
-                "upper": upper,
+                "lower": np.array(lower) - norm_temp,
+                "mean": np.array(mean) - norm_temp,
+                "upper": np.array(upper) - norm_temp,
             }
-
             dprint(self._verbose,
-                   "normalized dataset ({}): mean \\\n{}".format(region, mean))
+                   ("normalized dataset ({}): mean \\\n{}"
+                    .format(region, np.array(mean) - norm_temp)))
 
     def datasets_regions(self):
         """Return the dataset regions set by the user at command-line"""
