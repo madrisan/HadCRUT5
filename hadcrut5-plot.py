@@ -158,7 +158,6 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
         current = anomaly_current.get(hc5.GLOBAL_REGION)
         maximum = anomaly_max.get(hc5.GLOBAL_REGION)
         if annotate > 0 and current and maximum:
-            plt.gca()
             plt.annotate(("current global anomaly: {0:+.2f}°C, max: {1:+.2f}°C"
                           .format(current, maximum)),
                          xy=(0.98, 0.03),
