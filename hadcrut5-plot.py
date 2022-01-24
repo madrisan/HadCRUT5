@@ -10,6 +10,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
+from math import trunc
 from hadcrut5lib import argparser, dprint, HadCRUT5
 
 def parse_args():
@@ -105,16 +106,18 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
     anomaly_current = {}
     anomaly_max = {}
 
+    dataset_years = hc5.dataset_years()
+
     for region in hc5.datasets_regions():
         lower, mean, upper = hc5.dataset_normalized_data(region)
-        years = hc5.dataset_years()
 
         if chunksize > 1:
-            years, mean = dataset_smoother(years, mean, chunksize)
+            years, mean = dataset_smoother(dataset_years, mean, chunksize)
             dprint(verbose, "years: \\\n{}".format(np.array(years)))
             dprint(verbose, "temperatures ({}): \\\n{}".format(region, mean))
             dprint(verbose, "delta ({}): \\\n{}".format(years[-1], mean[-1]))
         else:
+            years = dataset_years
             plt.fill_between(years, lower, upper, color="lightgray")
 
             anomaly_current[region] = dataset_current_anomaly(mean)
@@ -142,7 +145,7 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
                  markersize=12,
                  label=region)
 
-    plt.hlines(0, np.min(years), np.max(years),
+    plt.hlines(0, np.min(dataset_years), np.max(dataset_years),
                colors='gray', linestyles='dotted')
 
     plt.title((
@@ -158,8 +161,9 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
         current = anomaly_current.get(hc5.GLOBAL_REGION)
         maximum = anomaly_max.get(hc5.GLOBAL_REGION)
         if annotate > 0 and current and maximum:
-            plt.annotate(("current global anomaly: {0:+.2f}°C, max: {1:+.2f}°C"
-                          .format(current, maximum)),
+            current_year = trunc(hc5.dataset_years()[-1])
+            plt.annotate(("current global anomaly ({0}): {1:+.2f}°C, max: {2:+.2f}°C"
+                          .format(current_year, current, maximum)),
                          xy=(0.98, 0.03),
                          xycoords="axes fraction",
                          fontsize=8,

@@ -228,8 +228,14 @@ class HadCRUT5:
         return self._period
 
     def dataset_years(self):
-        """Return an array of years corresponding of the loaded dataset"""
-        mean = self._datasets[self.GLOBAL_REGION]["variables"]["tas_mean"][:]
+        """
+        Return an array of years corresponding of the loaded datasets.
+        If the original dataset packages monthly data, the returning vector
+        will contain float values (year plus a decimal part for the month).
+        """
+        # The datasets have all the same length so choose the first one
+        region = list(self._datasets.keys())[0]
+        mean = self._datasets[region]["variables"]["tas_mean"][:]
         factor = 1/12 if self.is_monthly_dataset else 1
         years = [1850 + (y * factor) for y in range(len(mean))]
         dprint(self._verbose, "years: \\\n{}".format(np.array(years)))
