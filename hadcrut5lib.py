@@ -71,7 +71,7 @@ class HadCRUT5:
             raise Exception(("Unsupported time series type \"{}\""
                              .format(datatype)))
         if period not in self._VALID_PERIODS:
-            raise Exception(("Unsupported reference period: {}"
+            raise Exception(("Unsupported reference period: \"{}\""
                              .format(period)))
 
         # will be populated by datasets_load()
@@ -152,7 +152,7 @@ class HadCRUT5:
                 norm_temp = np.mean(temperatures[:50*factor])
             elif self._period == "1880-1920":
                 # We have to skip the first 30 years here
-                norm_temp = np.mean(temperatures[30*factor:41*factor])
+                norm_temp = np.mean(temperatures[30*factor:70*factor+1])
             else:
                 # this should never happen...
                 raise Exception(("Unsupported period \"{}\"".format(self._period)))
