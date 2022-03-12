@@ -18,13 +18,13 @@ from netCDF4 import Dataset as nc_Dataset
 __author__ = "Davide Madrisan"
 __copyright__ = "Copyright (C) 2020-2022 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
-__version__ = "2"
+__version__ = "2021.2"
 __email__ = "davide.madrisan@gmail.com"
 __status__ = "stable"
 
 def copyleft(descr):
     """Print the Copyright message and License """
-    return ("{} v.{} ({})\n{} <{}>\nLicense: {}"
+    return ("{} v{} ({})\n{} <{}>\nLicense: {}"
             .format(descr, __version__, __status__,
                     __copyright__, __email__,
                     __license__))
