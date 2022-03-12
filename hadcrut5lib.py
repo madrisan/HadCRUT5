@@ -65,8 +65,6 @@ class HadCRUT5:
                  smoother=1,
                  verbose=False):
 
-        enable_global, enable_northern, enable_southern = regions
-
         if datatype not in self._VALID_DATATYPES:
             raise Exception(("Unsupported time series type \"{}\""
                              .format(datatype)))
@@ -80,13 +78,14 @@ class HadCRUT5:
         self._datasets_normalized = {}
 
         self._datatype = datatype
+
+        (self._enable_global,
+         self._enable_northern,
+         self._enable_southern) = regions
+
         self._period = period
         self._smoother = smoother
         self._verbose = verbose
-
-        self._enable_global = enable_global
-        self._enable_northern = enable_northern
-        self._enable_southern = enable_southern
 
         self._global_filename = (
             "HadCRUT.{}.analysis.summary_series.global.{}.nc"
