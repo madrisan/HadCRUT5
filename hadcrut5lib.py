@@ -8,6 +8,7 @@ datasets.  See: https://www.metoffice.gov.uk/hadobs/hadcrut5/
 """
 
 import argparse
+import json
 import numpy as np
 import requests
 
@@ -118,14 +119,27 @@ class HadCRUT5:
                 "variables" : dataset.variables,
             }
 
+        def dataset_metadata_dump(dataset_name, dataset):
+            metadata = dataset["metadata"]
+            dprint(self._verbose,
+                   ("Metadata for \"{}\" dataset:\n{}"
+                    .format(dataset_name,
+                            json.dumps(metadata, indent=2))))
+
         if self._enable_global:
-            self._datasets["Global"] = dataset_load(self._global_filename)
+            region = "Global"
+            self._datasets[region] = dataset_load(self._global_filename)
+            dataset_metadata_dump(region, self._datasets[region])
         if self._enable_northern:
-            self._datasets["Northern Hemisphere"] = \
+            region = "Northern Hemisphere"
+            self._datasets[region] = \
                 dataset_load(self._northern_hemisphere_filename)
+            dataset_metadata_dump(region, self._datasets[region])
         if self._enable_southern:
-            self._datasets["Southern Hemisphere"] = \
+            region = "Southern Hemisphere"
+            self._datasets[region] = \
                 dataset_load(self._southern_hemisphere_filename)
+            dataset_metadata_dump(region, self._datasets[region])
 
     def datasets_normalize(self):
         """
@@ -163,7 +177,8 @@ class HadCRUT5:
         for region in self._datasets:
             mean = self._datasets[region]["variables"]["tas_mean"]
             dprint(self._verbose,
-                   "dataset ({}): mean \\\n{}".format(region, mean[:]))
+                   ("dataset ({}): mean ({} entries) \\\n{}"
+                    .format(region, len(mean), mean[:])))
 
             lower = self._datasets[region]["variables"]["tas_lower"]
             upper = self._datasets[region]["variables"]["tas_upper"]
@@ -213,6 +228,14 @@ class HadCRUT5:
     def dataset_datatype(self):
         """Return the datatype string"""
         return self._datatype
+
+    @property
+    def dataset_history(self):
+        """Return the datatype history from metadata"""
+        # The datasets have all the same length so choose the first one
+        region = list(self._datasets.keys())[0]
+        metadata = self._datasets[region]["metadata"]
+        return metadata.get("history")
 
     def dataset_normalized_data(self, region):
         """Return the dataset data normalized for the specified region"""

@@ -155,11 +155,13 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
 
     ylabel = ("{} Temperature Anomalies in °C"
               .format(hc5.dataset_datatype.capitalize()))
+
     if chunksize > 1:
         ylabel += " ({}-year averages)".format(chunksize)
     else:
         current = anomaly_current.get(hc5.GLOBAL_REGION)
         maximum = anomaly_max.get(hc5.GLOBAL_REGION)
+
         if annotate > 0 and current and maximum:
             current_year = trunc(hc5.dataset_years()[-1])
             plt.annotate(("current global anomaly ({0}): {1:+.2f}°C, max: {2:+.2f}°C"
@@ -176,6 +178,13 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
                              "alpha": 0.3,
                              "pad": 5,
                          })
+
+        plt.annotate(hc5.dataset_history,
+                     xy=(0.01, 0.8),
+                     xycoords="axes fraction",
+                     fontsize=8,
+                     horizontalalignment="left",
+                     verticalalignment="top")
 
     plt.ylabel(ylabel, fontsize=10)
     plt.legend()
