@@ -179,12 +179,12 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
                              "pad": 5,
                          })
 
-        plt.annotate(hc5.dataset_history,
-                     xy=(0.01, 0.8),
-                     xycoords="axes fraction",
-                     fontsize=8,
-                     horizontalalignment="left",
-                     verticalalignment="top")
+    plt.annotate(hc5.dataset_history,
+                 xy=(0.01, 0.8),
+                 xycoords="axes fraction",
+                 fontsize=8,
+                 horizontalalignment="left",
+                 verticalalignment="top")
 
     plt.ylabel(ylabel, fontsize=10)
     plt.legend()
