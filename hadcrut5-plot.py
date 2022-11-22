@@ -102,7 +102,7 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
     hc5.datasets_load()
     hc5.datasets_normalize()
 
-    mpl.style.use("seaborn-notebook")
+    mpl.style.use("seaborn-v0_8-notebook")
     anomaly_current = {}
     anomaly_max = {}
 
