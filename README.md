@@ -127,3 +127,8 @@ The image for to the anomalies related to the period `1880-1920` follows.
 $ ./hadcrut5-bars.py --period "1880-1920" --outfile plots/HadCRUT5-global-1880-1920.png
 ```
 ![HadCRUT5 bar plotting related to 1880-1920](plots/HadCRUT5-global-1880-1920.png)
+
+# License
+
+The Python code of this project is released under the [GPL-3.0 license](https://github.com/madrisan/HadCRUT5/blob/main/LICENSE).
+The graphics have a [CC-BY4.0 license](https://creativecommons.org/licenses/by/4.0/), so can be used for any purpose as long as credit is given to Madrisan Davide and a link is provided to this website.
