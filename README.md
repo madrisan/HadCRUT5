@@ -128,6 +128,33 @@ $ ./hadcrut5-bars.py --period "1880-1920" --outfile plots/HadCRUT5-global-1880-1
 ```
 ![HadCRUT5 bar plotting related to 1880-1920](plots/HadCRUT5-global-1880-1920.png)
 
+## hadcrut5-stripe.py &mdash; Script usage
+
+```
+usage: hadcrut5-stripe.py [-h] [-f OUTFILE] [-r {global,northern,southern}] [-v]
+
+Parse and plot a stripe image of the HadCRUT5 temperature datasets v2021.2 (stable)
+Copyright (C) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
+License: GNU General Public License v3.0
+
+options:
+  -h, --help            show this help message and exit
+  -f OUTFILE, --outfile OUTFILE
+                        name of the output PNG file
+  -r {global,northern,southern}, --region {global,northern,southern}
+                        select between Global (default), Northern, or Southern Temperatures
+  -v, --verbose         make the operation more talkative
+
+examples:
+  hadcrut5-stripe.py
+  hadcrut5-stripe.py --region northern
+  hadcrut5-stripe.py --region global --outfile HadCRUT5-stripe-global.png
+```
+
+Below is a generated striped image for global anomalies.
+
+![HadCRUT5 global warming stripe](plots/HadCRUT5-global-stripe.png)
+
 # License
 
 The Python code of this project is released under the [GPL-3.0 license](https://github.com/madrisan/HadCRUT5/blob/main/LICENSE).
