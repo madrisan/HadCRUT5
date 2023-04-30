@@ -58,6 +58,8 @@ class HadCRUT5:
     _VALID_PERIODS = [_DEFAULT_PERIOD, "1850-1900", "1880-1920"]
 
     GLOBAL_REGION = "Global"
+    NORTHERN_REGION = "Northern Hemisphere"
+    SOUTHERN_REGION = "Southern Hemisphere"
 
     def __init__(self,
                  period=_DEFAULT_PERIOD,
@@ -127,16 +129,16 @@ class HadCRUT5:
                             json.dumps(metadata, indent=2))))
 
         if self._enable_global:
-            region = "Global"
+            region = self.GLOBAL_REGION
             self._datasets[region] = dataset_load(self._global_filename)
             dataset_metadata_dump(region, self._datasets[region])
         if self._enable_northern:
-            region = "Northern Hemisphere"
+            region = self.NORTHERN_REGION
             self._datasets[region] = \
                 dataset_load(self._northern_hemisphere_filename)
             dataset_metadata_dump(region, self._datasets[region])
         if self._enable_southern:
-            region = "Southern Hemisphere"
+            region = self.SOUTHERN_REGION
             self._datasets[region] = \
                 dataset_load(self._southern_hemisphere_filename)
             dataset_metadata_dump(region, self._datasets[region])
