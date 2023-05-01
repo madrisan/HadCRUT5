@@ -19,3 +19,7 @@ done
     --time-series monthly \
     --global \
     --outfile plots/HadCRUT5-monthly-global-1880-1920.png
+
+./hadcrut5-stripe.py \
+    --region global \
+    --outfile plots/HadCRUT5-global-stripe.png
