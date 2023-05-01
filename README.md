@@ -31,8 +31,8 @@ They require the Python libraries: Matplotlib, netCDF4, NumPy, and Requests.
 $ ./hadcrut5-plot.py --help
 usage: hadcrut5-plot.py [-h] [-f OUTFILE] [-p PERIOD] [-m SMOOTHER] [-g] [-n] [-s] [-a ANNOTATE] [-v]
 
-Parse and plot the HadCRUT5 temperature datasets v.2 (stable)
-Copyright (C) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
+Parse and plot the HadCRUT5 temperature datasets v2023.1 (stable)
+Copyright (C) 2020-2023 Davide Madrisan <davide.madrisan@gmail.com>
 License: GNU General Public License v3.0
 
 options:
@@ -104,8 +104,8 @@ $ ./hadcrut5-plot.py --global --period "1880-1920" --time-series monthly
 ```
 usage: hadcrut5-bars.py [-h] [-f OUTFILE] [-p PERIOD] [-v]
 
-Parse and plot the HadCRUT5 temperature datasets v.2 (stable)
-Copyright (C) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
+Parse and plot the HadCRUT5 temperature datasets v2023.1 (stable)
+Copyright (C) 2020-2023 Davide Madrisan <davide.madrisan@gmail.com>
 License: GNU General Public License v3.0
 
 options:
@@ -131,10 +131,10 @@ $ ./hadcrut5-bars.py --period "1880-1920" --outfile plots/HadCRUT5-global-1880-1
 ## hadcrut5-stripe.py &mdash; Script usage
 
 ```
-usage: hadcrut5-stripe.py [-h] [-f OUTFILE] [-r {global,northern,southern}] [-v]
+usage: hadcrut5-stripe.py [-h] [-f OUTFILE] [-r {global,northern,southern}] [-v] [-l]
 
-Parse and plot a stripe image of the HadCRUT5 temperature datasets v2021.2 (stable)
-Copyright (C) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
+Parse and plot a stripe image of the HadCRUT5 temperature datasets v2023.1 (stable)
+Copyright (C) 2020-2023 Davide Madrisan <davide.madrisan@gmail.com>
 License: GNU General Public License v3.0
 
 options:
@@ -144,10 +144,11 @@ options:
   -r {global,northern,southern}, --region {global,northern,southern}
                         select between Global (default), Northern, or Southern Temperatures
   -v, --verbose         make the operation more talkative
+  -l, --no-labels       do not disply the header and footer labels
 
 examples:
   hadcrut5-stripe.py
-  hadcrut5-stripe.py --region northern
+  hadcrut5-stripe.py --no-labels --region northern
   hadcrut5-stripe.py --region global --outfile HadCRUT5-stripe-global.png
 ```
 

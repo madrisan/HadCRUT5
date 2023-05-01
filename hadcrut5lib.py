@@ -17,9 +17,9 @@ from netCDF4 import Dataset as nc_Dataset
 # pylint: enable=E0611
 
 __author__ = "Davide Madrisan"
-__copyright__ = "Copyright (C) 2020-2022 Davide Madrisan"
+__copyright__ = "Copyright (C) 2020-2023 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
-__version__ = "2021.2"
+__version__ = "2023.1"
 __email__ = "davide.madrisan@gmail.com"
 __status__ = "stable"
 

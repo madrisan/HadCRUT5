@@ -34,10 +34,15 @@ def parse_args():
         "-v", "--verbose",
         action="store_true", dest="verbose",
         help="make the operation more talkative")
+    parser.add_argument(
+        "-l", "--no-labels",
+        action="store_false", dest="labels",
+        help="do not disply the header and footer labels")
+    parser.set_defaults(labels=True)
 
     return parser.parse_args()
 
-def plotstripe(region, outfile, verbose):
+def plotstripe(region, outfile, labels, verbose):
     """
     Create a stripe plot for the specified period and diplay it or save it to
     file if outfile is set
@@ -86,21 +91,24 @@ def plotstripe(region, outfile, verbose):
     ax.add_collection(collection)
     ax.get_yaxis().set_visible(False)
     ax.set_frame_on(False)
-    ax.tick_params(axis='both', which='both', length=0)
 
-    #pylint: disable=consider-using-f-string
-    plt.title(("{} Temperature Change ({}-{})"
-               .format(regions_switch[region],
-                       yfirst,
-                       ylast)),
-               fontsize=16,
-               loc='left',
-               fontweight='bold',
-               family='DejaVu Sans')
+    if labels:
+        ax.tick_params(axis='both', which='both', length=0)
+        #pylint: disable=consider-using-f-string
+        plt.title(("{} Temperature Change ({}-{})"
+                   .format(regions_switch[region],
+                           yfirst,
+                           ylast)),
+                   fontsize=16,
+                   loc='left',
+                   fontweight='bold',
+                   family='DejaVu Sans')
 
-    ticks = [0, 0.2, 0.4, 0.6, 0.8, 1]
-    labels = [round(yfirst + x*yrange) for x in ticks]
-    plt.xticks(ticks, labels, fontweight='bold', fontsize=12)
+        ticks = [0, 0.2, 0.4, 0.6, 0.8, 1]
+        xlabels = [round(yfirst + x*yrange) for x in ticks]
+        plt.xticks(ticks, xlabels, fontweight='bold', fontsize=12)
+    else:
+        ax.get_xaxis().set_visible(False)
 
     fig = plt.gcf()
     fig.set_size_inches(10, 4)   # 1 inch equal to 80pt
@@ -116,6 +124,7 @@ def main():
     args = parse_args()
     plotstripe(args.region,
                args.outfile,
+               args.labels,
                args.verbose)
 
 main()
