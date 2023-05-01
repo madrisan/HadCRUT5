@@ -18,7 +18,7 @@ def parse_args():
     descr = "Parse and plot a stripe image of the HadCRUT5 temperature datasets"
     examples = [
        "%(prog)s",
-       "%(prog)s --region northern",
+       "%(prog)s --no-labels --region northern",
        "%(prog)s --region global --outfile HadCRUT5-stripe-global.png"]
 
     parser = argparser(descr, examples)
