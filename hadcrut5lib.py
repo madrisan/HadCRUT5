@@ -14,6 +14,7 @@ import requests
 
 # pylint: disable=E0611
 from netCDF4 import Dataset as nc_Dataset
+
 # pylint: enable=E0611
 
 __author__ = "Davide Madrisan"
@@ -23,24 +24,28 @@ __version__ = "2023.1"
 __email__ = "davide.madrisan@gmail.com"
 __status__ = "stable"
 
+
 def copyleft(descr):
-    """Print the Copyright message and License """
-    return ("{} v{} ({})\n{} <{}>\nLicense: {}"
-            .format(descr, __version__, __status__,
-                    __copyright__, __email__,
-                    __license__))
+    """Print the Copyright message and License"""
+    return "{} v{} ({})\n{} <{}>\nLicense: {}".format(
+        descr, __version__, __status__, __copyright__, __email__, __license__
+    )
+
 
 def argparser(descr, examples):
-    """Return a new ArgumentParser object """
+    """Return a new ArgumentParser object"""
     return argparse.ArgumentParser(
-               formatter_class = argparse.RawDescriptionHelpFormatter,
-               description = copyleft(descr),
-               epilog = "examples:\n  " + "\n  ".join(examples))
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=copyleft(descr),
+        epilog="examples:\n  " + "\n  ".join(examples),
+    )
+
 
 def dprint(verbose, message):
     """Print a message when in verbose mode only"""
     if verbose:
         print(message)
+
 
 # pylint: disable=R0902
 class HadCRUT5:
@@ -61,19 +66,18 @@ class HadCRUT5:
     NORTHERN_REGION = "Northern Hemisphere"
     SOUTHERN_REGION = "Southern Hemisphere"
 
-    def __init__(self,
-                 period=_DEFAULT_PERIOD,
-                 datatype=_DEFAULT_DATATYPE,
-                 regions=(True, False, False),
-                 smoother=1,
-                 verbose=False):
-
+    def __init__(
+        self,
+        period=_DEFAULT_PERIOD,
+        datatype=_DEFAULT_DATATYPE,
+        regions=(True, False, False),
+        smoother=1,
+        verbose=False,
+    ):
         if datatype not in self._VALID_DATATYPES:
-            raise Exception(("Unsupported time series type \"{}\""
-                             .format(datatype)))
+            raise Exception(('Unsupported time series type "{}"'.format(datatype)))
         if period not in self._VALID_PERIODS:
-            raise Exception(("Unsupported reference period: \"{}\""
-                             .format(period)))
+            raise Exception(('Unsupported reference period: "{}"'.format(period)))
 
         # will be populated by datasets_load()
         self._datasets = {}
@@ -82,23 +86,27 @@ class HadCRUT5:
 
         self._datatype = datatype
 
-        (self._enable_global,
-         self._enable_northern,
-         self._enable_southern) = regions
+        (self._enable_global, self._enable_northern, self._enable_southern) = regions
 
         self._period = period
         self._smoother = smoother
         self._verbose = verbose
 
         self._global_filename = (
-            "HadCRUT.{}.analysis.summary_series.global.{}.nc"
-            .format(self._DATASET_VERSION, datatype))
+            "HadCRUT.{}.analysis.summary_series.global.{}.nc".format(
+                self._DATASET_VERSION, datatype
+            )
+        )
         self._northern_hemisphere_filename = (
-            "HadCRUT.{}.analysis.summary_series.northern_hemisphere.{}.nc"
-            .format(self._DATASET_VERSION, datatype))
+            "HadCRUT.{}.analysis.summary_series.northern_hemisphere.{}.nc".format(
+                self._DATASET_VERSION, datatype
+            )
+        )
         self._southern_hemisphere_filename = (
-            "HadCRUT.{}.analysis.summary_series.southern_hemisphere.{}.nc"
-            .format(self._DATASET_VERSION, datatype))
+            "HadCRUT.{}.analysis.summary_series.southern_hemisphere.{}.nc".format(
+                self._DATASET_VERSION, datatype
+            )
+        )
 
     def datasets_download(self):
         """Download the required HadCRUT5 datasets"""
@@ -117,16 +125,20 @@ class HadCRUT5:
             dataset = nc_Dataset(dataset_filename)
             return {
                 "dimensions": dataset.dimensions,
-                "metadata"  : dataset.__dict__,
-                "variables" : dataset.variables,
+                "metadata": dataset.__dict__,
+                "variables": dataset.variables,
             }
 
         def dataset_metadata_dump(dataset_name, dataset):
             metadata = dataset["metadata"]
-            dprint(self._verbose,
-                   ("Metadata for \"{}\" dataset:\n{}"
-                    .format(dataset_name,
-                            json.dumps(metadata, indent=2))))
+            dprint(
+                self._verbose,
+                (
+                    'Metadata for "{}" dataset:\n{}'.format(
+                        dataset_name, json.dumps(metadata, indent=2)
+                    )
+                ),
+            )
 
         if self._enable_global:
             region = self.GLOBAL_REGION
@@ -134,13 +146,11 @@ class HadCRUT5:
             dataset_metadata_dump(region, self._datasets[region])
         if self._enable_northern:
             region = self.NORTHERN_REGION
-            self._datasets[region] = \
-                dataset_load(self._northern_hemisphere_filename)
+            self._datasets[region] = dataset_load(self._northern_hemisphere_filename)
             dataset_metadata_dump(region, self._datasets[region])
         if self._enable_southern:
             region = self.SOUTHERN_REGION
-            self._datasets[region] = \
-                dataset_load(self._southern_hemisphere_filename)
+            self._datasets[region] = dataset_load(self._southern_hemisphere_filename)
             dataset_metadata_dump(region, self._datasets[region])
 
     def datasets_normalize(self):
@@ -149,6 +159,7 @@ class HadCRUT5:
         Set _datasets_normalized with a tuple containing lower, mean, and upper
         temperatures for every enabled region
         """
+
         def normalization_value(temperatures):
             """
             Return the value to be substracted to temperatures in order to
@@ -164,23 +175,34 @@ class HadCRUT5:
             if self._period == "1850-1900":
                 # The dataset starts from 1850-01-01 00:00:00
                 # so we calculate the mean of the first 50 years
-                norm_temp = np.mean(temperatures[:50*factor])
+                norm_temp = np.mean(temperatures[: 50 * factor])
             elif self._period == "1880-1920":
                 # We have to skip the first 30 years here
-                norm_temp = np.mean(temperatures[30*factor:70*factor+1])
+                norm_temp = np.mean(temperatures[30 * factor : 70 * factor + 1])
             else:
                 # this should never happen...
-                raise Exception(("Unsupported period \"{}\"".format(self._period)))
+                raise Exception(('Unsupported period "{}"'.format(self._period)))
 
-            dprint(self._verbose, ("The mean anomaly in {0} is about {1:.8f}°C"
-                                   .format(self._period, norm_temp)))
+            dprint(
+                self._verbose,
+                (
+                    "The mean anomaly in {0} is about {1:.8f}°C".format(
+                        self._period, norm_temp
+                    )
+                ),
+            )
             return norm_temp
 
         for region in self._datasets:
             mean = self._datasets[region]["variables"]["tas_mean"]
-            dprint(self._verbose,
-                   ("dataset ({}): mean ({} entries) \\\n{}"
-                    .format(region, len(mean), mean[:])))
+            dprint(
+                self._verbose,
+                (
+                    "dataset ({}): mean ({} entries) \\\n{}".format(
+                        region, len(mean), mean[:]
+                    )
+                ),
+            )
 
             lower = self._datasets[region]["variables"]["tas_lower"]
             upper = self._datasets[region]["variables"]["tas_upper"]
@@ -192,9 +214,14 @@ class HadCRUT5:
                 "mean": np.array(mean) - norm_temp,
                 "upper": np.array(upper) - norm_temp,
             }
-            dprint(self._verbose,
-                   ("normalized dataset ({}): mean \\\n{}"
-                    .format(region, np.array(mean) - norm_temp)))
+            dprint(
+                self._verbose,
+                (
+                    "normalized dataset ({}): mean \\\n{}".format(
+                        region, np.array(mean) - norm_temp
+                    )
+                ),
+            )
 
     def datasets_regions(self):
         """Return the dataset regions set by the user at command-line"""
@@ -215,14 +242,14 @@ class HadCRUT5:
                     print("Using the local dataset file: {}".format(filename))
         except IOError:
             if self._verbose:
-                print ("Downloading {} ...".format(filename))
+                print("Downloading {} ...".format(filename))
 
             url_dataset = self._hadcrut5_data_url(filename)
             response = requests.get(url_dataset, stream=True)
             # Throw an error for bad status codes
             response.raise_for_status()
 
-            with open(filename, 'wb') as handle:
+            with open(filename, "wb") as handle:
                 for block in response.iter_content(1024):
                     handle.write(block)
 
@@ -260,7 +287,7 @@ class HadCRUT5:
         # The datasets have all the same length so choose the first one
         region = list(self._datasets.keys())[0]
         mean = self._datasets[region]["variables"]["tas_mean"][:]
-        factor = 1/12 if self.is_monthly_dataset else 1
+        factor = 1 / 12 if self.is_monthly_dataset else 1
         years = [1850 + (y * factor) for y in range(len(mean))]
         dprint(self._verbose, "years: \\\n{}".format(np.array(years)))
         return years
