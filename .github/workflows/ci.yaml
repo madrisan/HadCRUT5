@@ -1,0 +1,12 @@
+name: black-action
+on: [push, pull_request]
+jobs:
+  linter_name:
+    name: runner / black formatter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: datadog/action-py-black-formatter@v2.5
+        with:
+          check_mode: "true"
+          print_diff_mode: "true"
