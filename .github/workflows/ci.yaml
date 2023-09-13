@@ -1,12 +1,25 @@
-name: black-action
+name: lint
 on: [push, pull_request]
 jobs:
-  linter_name:
-    name: runner / black formatter
+  run-linters:
+    name: Run linters
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: datadog/action-py-black-formatter@v2.5
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
         with:
-          check_mode: "true"
-          print_diff_mode: "true"
+          python-version: 3.8
+
+      - name: Install Python dependencies
+        run: pip install black flake8
+
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          auto_fix: false
+          black: true
+          flake8: false
