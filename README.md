@@ -32,7 +32,7 @@ $ ./hadcrut5-plot.py --help
 usage: hadcrut5-plot.py [-h] [-f OUTFILE] [-p PERIOD] [-m SMOOTHER] [-g] [-n] [-s] [-a ANNOTATE] [-v]
 
 Parse and plot the HadCRUT5 temperature datasets v2023.1 (stable)
-Copyright (C) 2020-2023 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2020-2023 Davide Madrisan <d.madrisan@proton.me>
 License: GNU General Public License v3.0
 
 options:
@@ -105,7 +105,7 @@ $ ./hadcrut5-plot.py --global --period "1880-1920" --time-series monthly
 usage: hadcrut5-bars.py [-h] [-f OUTFILE] [-p PERIOD] [-v]
 
 Parse and plot the HadCRUT5 temperature datasets v2023.1 (stable)
-Copyright (C) 2020-2023 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2020-2023 Davide Madrisan <d.madrisan@proton.me>
 License: GNU General Public License v3.0
 
 options:
@@ -134,7 +134,7 @@ $ ./hadcrut5-bars.py --period "1880-1920" --outfile plots/HadCRUT5-global-1880-1
 usage: hadcrut5-stripe.py [-h] [-f OUTFILE] [-r {global,northern,southern}] [-v] [-l]
 
 Parse and plot a stripe image of the HadCRUT5 temperature datasets v2023.1 (stable)
-Copyright (C) 2020-2023 Davide Madrisan <davide.madrisan@gmail.com>
+Copyright (C) 2020-2023 Davide Madrisan <d.madrisan@proton.me>
 License: GNU General Public License v3.0
 
 options:

@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright (c) 2020-2022 Davide Madrisan <davide.madrisan@gmail.com>
+# Copyright (c) 2020-2022 Davide Madrisan <d.madrisan@proton.me>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
@@ -21,7 +21,7 @@ __author__ = "Davide Madrisan"
 __copyright__ = "Copyright (C) 2020-2023 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
 __version__ = "2023.1"
-__email__ = "davide.madrisan@gmail.com"
+__email__ = "d.madrisan@proton.me"
 __status__ = "stable"
 
 
