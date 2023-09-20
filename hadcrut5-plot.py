@@ -154,7 +154,7 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
             if annotate > 1:
                 plt.annotate(
                     "{0:.2f}°C".format(anomaly_current[region]),
-                    xy=(years[-1] - 5, anomaly_current[region] + 0.05),
+                    xy=(years[-1] - 2, anomaly_current[region] - 0.15),
                     fontsize=6,
                     horizontalalignment="left",
                     bbox={"facecolor": "lightgray", "alpha": 0.6, "pad": 3},
