@@ -1,24 +1,22 @@
 # Visualize the HadCRUT5 temperature datasets
 
 > HadCRUT5 is a gridded dataset of global historical surface temperature anomalies relative to a 1961-1990 reference period.
-> Data are available for each month from January 1850 to December 2018 (updates will be available in time), on a 5 degree grid.
+> Data are available for each month from January 1850 onwards, on a 5 degree grid and as global and regional average time series.
 > The dataset is a collaborative product of the Met Office Hadley Centre and the Climatic Research Unit at the University of East Anglia.
 >
-> HadCRUT5 data has now been updated to include data to the year 2020 in HadCRUT.5.0.1.0, available from the download page.
+> The current version of HadCRUT5 is HadCRUT.5.0.2.0, available from the download page.
 >
 > &mdash; source: [HadCRUT5 Index](https://www.metoffice.gov.uk/hadobs/hadcrut5/index.html)
 
-> Stations on land are at different elevations, and different countries calculate average monthly temperatures using different methods and formulae.
-> To avoid biases that could result from these differences, monthly average temperatures are reduced to anomalies from the period with best coverage (1961-90).
->
-> &mdash; source: [HadCRUT5 FAQ-5](https://crudata.uea.ac.uk/cru/data/temperature/#faq5)
+A detailed description of the datasets can be found in the
+[`Answers to Frequently Asked Questions`](https://crudata.uea.ac.uk/cru/data/temperature/).
 
-Datafiles that are loaded by the Python script:
- * HadCRUT.5.0.2.0.analysis.summary_series.global.annual.nc
- * HadCRUT.5.0.2.0.analysis.summary_series.northern_hemisphere.annual.nc
- * HadCRUT.5.0.2.0.analysis.summary_series.southern_hemisphere.annual.nc
+List of the datafiles that are loaded by the Python script:
+ * `HadCRUT.5.0.2.0.analysis.summary_series.global.annual.nc`
+ * `HadCRUT.5.0.2.0.analysis.summary_series.northern_hemisphere.annual.nc`
+ * `HadCRUT.5.0.2.0.analysis.summary_series.southern_hemisphere.annual.nc`
 
-HadCRUT5 data taken from: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.0.2.0/download.html
+HadCRUT5 data are downloaded from: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.0.2.0/download.html
 
 ## Plot of the temperature anomalies
 
