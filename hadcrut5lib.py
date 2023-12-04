@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright (c) 2020-2022 Davide Madrisan <d.madrisan@proton.me>
+# Copyright (c) 2020-2023 Davide Madrisan <d.madrisan@proton.me>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
@@ -20,7 +20,7 @@ from netCDF4 import Dataset as nc_Dataset
 __author__ = "Davide Madrisan"
 __copyright__ = "Copyright (C) 2020-2023 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
-__version__ = "2023.1"
+__version__ = "2023.2"
 __email__ = "d.madrisan@proton.me"
 __status__ = "stable"
 
@@ -52,7 +52,7 @@ class HadCRUT5:
     """Class for parsing and plotting HadCRUT5 datasets"""
 
     # current dataset version
-    _DATASET_VERSION = "5.0.1.0"
+    _DATASET_VERSION = "5.0.2.0"
 
     # list of all the available data types
     _DEFAULT_DATATYPE = "annual"
@@ -227,10 +227,11 @@ class HadCRUT5:
         """Return the dataset regions set by the user at command-line"""
         return self._datasets.keys()
 
-    @staticmethod
-    def _hadcrut5_data_url(filename):
+    def _hadcrut5_data_url(self, filename):
         site = "https://www.metoffice.gov.uk"
-        path = "/hadobs/hadcrut5/data/current/analysis/diagnostics/"
+        path = "/hadobs/hadcrut5/data/HadCRUT.{}/analysis/diagnostics/".format(
+            self._DATASET_VERSION
+        )
         url = "{}{}{}".format(site, path, filename)
         return url
 
