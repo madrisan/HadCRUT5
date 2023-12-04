@@ -14,11 +14,11 @@
 > &mdash; source: [HadCRUT5 FAQ-5](https://crudata.uea.ac.uk/cru/data/temperature/#faq5)
 
 Datafiles that are loaded by the Python script:
- * HadCRUT.5.0.1.0.analysis.summary_series.global.annual.nc
- * HadCRUT.5.0.1.0.analysis.summary_series.northern_hemisphere.annual.nc
- * HadCRUT.5.0.1.0.analysis.summary_series.southern_hemisphere.annual.nc
+ * HadCRUT.5.0.2.0.analysis.summary_series.global.annual.nc
+ * HadCRUT.5.0.2.0.analysis.summary_series.northern_hemisphere.annual.nc
+ * HadCRUT.5.0.2.0.analysis.summary_series.southern_hemisphere.annual.nc
 
-HadCRUT5 data taken from: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/current/download.html
+HadCRUT5 data taken from: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.0.2.0/download.html
 
 ## Plot of the temperature anomalies
 
