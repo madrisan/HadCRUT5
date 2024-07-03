@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright (c) 2020-2023 Davide Madrisan <d.madrisan@proton.me>
+# Copyright (c) 2020-2024 Davide Madrisan <d.madrisan@proton.me>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
@@ -9,8 +9,10 @@ datasets.  See: https://www.metoffice.gov.uk/hadobs/hadcrut5/
 
 import argparse
 import json
+import logging
 import numpy as np
 import requests
+import sys
 
 # pylint: disable=E0611
 from netCDF4 import Dataset as nc_Dataset
@@ -18,9 +20,9 @@ from netCDF4 import Dataset as nc_Dataset
 # pylint: enable=E0611
 
 __author__ = "Davide Madrisan"
-__copyright__ = "Copyright (C) 2020-2023 Davide Madrisan"
+__copyright__ = "Copyright (C) 2020-2024 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
-__version__ = "2023.2"
+__version__ = "2024.1"
 __email__ = "d.madrisan@proton.me"
 __status__ = "stable"
 
@@ -39,12 +41,6 @@ def argparser(descr, examples):
         description=copyleft(descr),
         epilog="examples:\n  " + "\n  ".join(examples),
     )
-
-
-def dprint(verbose, message):
-    """Print a message when in verbose mode only"""
-    if verbose:
-        print(message)
 
 
 # pylint: disable=R0902
@@ -108,6 +104,12 @@ class HadCRUT5:
             )
         )
 
+        self._logging_level = logging.DEBUG if self._verbose else logging.INFO
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s"
+        )
+        self._logger = logging.getLogger(__name__)
+
     def datasets_download(self):
         """Download the required HadCRUT5 datasets"""
         if self._enable_global:
@@ -131,8 +133,7 @@ class HadCRUT5:
 
         def dataset_metadata_dump(dataset_name, dataset):
             metadata = dataset["metadata"]
-            dprint(
-                self._verbose,
+            self.logging_debug(
                 (
                     'Metadata for "{}" dataset:\n{}'.format(
                         dataset_name, json.dumps(metadata, indent=2)
@@ -183,8 +184,7 @@ class HadCRUT5:
                 # this should never happen...
                 raise Exception(('Unsupported period "{}"'.format(self._period)))
 
-            dprint(
-                self._verbose,
+            self.logging_debug(
                 (
                     "The mean anomaly in {0} is about {1:.8f}°C".format(
                         self._period, norm_temp
@@ -195,8 +195,7 @@ class HadCRUT5:
 
         for region in self._datasets:
             mean = self._datasets[region]["variables"]["tas_mean"]
-            dprint(
-                self._verbose,
+            self.logging_debug(
                 (
                     "dataset ({}): mean ({} entries) \\\n{}".format(
                         region, len(mean), mean[:]
@@ -214,8 +213,7 @@ class HadCRUT5:
                 "mean": np.array(mean) - norm_temp,
                 "upper": np.array(upper) - norm_temp,
             }
-            dprint(
-                self._verbose,
+            self.logging_debug(
                 (
                     "normalized dataset ({}): mean \\\n{}".format(
                         region, np.array(mean) - norm_temp
@@ -226,6 +224,15 @@ class HadCRUT5:
     def datasets_regions(self):
         """Return the dataset regions set by the user at command-line"""
         return self._datasets.keys()
+
+    def logging(self, message):
+        """Print a message"""
+        logging.info(message)
+
+    def logging_debug(self, message):
+        """Print a message when in verbose mode only"""
+        if self._verbose:
+            logging.info(message)
 
     def _hadcrut5_data_url(self, filename):
         site = "https://www.metoffice.gov.uk"
@@ -240,13 +247,18 @@ class HadCRUT5:
         try:
             with open(filename):
                 if self._verbose:
-                    print("Using the local dataset file: {}".format(filename))
+                    logging.info("Using the local dataset file: {}".format(filename))
         except IOError:
             if self._verbose:
-                print("Downloading {} ...".format(filename))
+                logging.info("Downloading {} ...".format(filename))
 
             url_dataset = self._hadcrut5_data_url(filename)
-            response = requests.get(url_dataset, stream=True)
+            try:
+                response = requests.get(url_dataset, stream=True)
+            except Exception as e:
+                logging.error(f"{e}")
+                sys.exit(1)
+
             # Throw an error for bad status codes
             response.raise_for_status()
 
@@ -290,7 +302,7 @@ class HadCRUT5:
         mean = self._datasets[region]["variables"]["tas_mean"][:]
         factor = 1 / 12 if self.is_monthly_dataset else 1
         years = [1850 + (y * factor) for y in range(len(mean))]
-        dprint(self._verbose, "years: \\\n{}".format(np.array(years)))
+        self.logging_debug("years: \\\n{}".format(np.array(years)))
         return years
 
     @property

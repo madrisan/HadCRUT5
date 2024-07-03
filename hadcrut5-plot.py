@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright (c) 2020-2023 Davide Madrisan <d.madrisan@proton.me>
+# Copyright (c) 2020-2024 Davide Madrisan <d.madrisan@proton.me>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from math import trunc
-from hadcrut5lib import argparser, dprint, HadCRUT5
+from hadcrut5lib import argparser, HadCRUT5
 
 
 def parse_args():
@@ -139,17 +139,17 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
 
         if chunksize > 1:
             years, mean = dataset_smoother(dataset_years, mean, chunksize)
-            dprint(verbose, "years: \\\n{}".format(np.array(years)))
-            dprint(verbose, "temperatures ({}): \\\n{}".format(region, mean))
-            dprint(verbose, "delta ({}): \\\n{}".format(years[-1], mean[-1]))
+            hc5.logging_debug("years: \\\n{}".format(np.array(years)))
+            hc5.logging_debug("temperatures ({}): \\\n{}".format(region, mean))
+            hc5.logging_debug("delta ({}): \\\n{}".format(years[-1], mean[-1]))
         else:
             years = dataset_years
             plt.fill_between(years, lower, upper, color="lightgray")
 
             anomaly_current[region] = dataset_current_anomaly(mean)
             anomaly_max[region] = dataset_max_anomaly(mean)
-            dprint(verbose, ("Current anomalies: {}".format(anomaly_current[region])))
-            dprint(verbose, "Max anomalies: {}".format(anomaly_max[region]))
+            hc5.logging_debug("Current anomalies: {}".format(anomaly_current[region]))
+            hc5.logging_debug("Max anomalies: {}".format(anomaly_max[region]))
 
             if annotate > 1:
                 plt.annotate(
