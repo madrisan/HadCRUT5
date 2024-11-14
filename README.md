@@ -155,7 +155,9 @@ examples:
 ```
 
 Below is a generated striped image for global anomalies.
-
+```
+$ ./hadcrut5-stripe.py --region global
+```
 ![HadCRUT5 global warming stripe](plots/HadCRUT5-global-stripe.png)
 
 # License
