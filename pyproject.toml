@@ -1,6 +1,6 @@
 [project]
 name = "pyhadcrut5"
-version = "0.1.0"
+version = "1.0"
 description = "HadCRUT5 temperature datasets visualizer"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -9,4 +9,11 @@ dependencies = [
     "netcdf4>=1.6.5",
     "numpy>=1.26",
     "requests>=2.31",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.0",
+    "pylint>=3.3.2",
+    "types-requests>=2.32.0.20241016",
 ]
