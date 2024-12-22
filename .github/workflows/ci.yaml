@@ -20,7 +20,7 @@ jobs:
           version: "latest"
 
       - name: Install Python dependencies
-        run: pip install black flake8 pylint
+        run: pip install black flake8
 
       - name: Run linters
         uses: wearerequired/lint-action@v2
@@ -31,4 +31,4 @@ jobs:
 
       - name: Analysing the code with pylint
         run: |
-          uv run pylint $(git ls-files '*.py')
+          uv run pylint --output-format=text ./**/*.py
