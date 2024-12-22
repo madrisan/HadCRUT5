@@ -126,11 +126,7 @@ def plotstripe(region, outfile, labels, verbose):
         ax.tick_params(axis="both", which="both", length=0)
         # pylint: disable=consider-using-f-string
         plt.title(
-            (
-                "{} Temperature Change ({}-{})".format(
-                    regions_switch[region], yfirst, ylast
-                )
-            ),
+            ("{} Temperature Change ({}-{})".format(regions_switch[region], yfirst, ylast)),
             fontsize=16,
             loc="left",
             fontweight="bold",

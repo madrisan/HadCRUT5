@@ -6,11 +6,12 @@
 Display a plot of the HadCRUT5 temperature dataset.
 """
 
+from math import trunc
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
-from math import trunc
 from hadcrut5lib import argparser, HadCRUT5
 
 
@@ -119,7 +120,7 @@ def dataset_smoother(years, temperatures, chunksize):
     return subset_years, subset_temperatures
 
 
-def plotline(hc5, chunksize, annotate, outfile, verbose):
+def plotline(hc5, chunksize, annotate, outfile):
     """
     Create a plot for the specified period and arguments and diplay it or save
     it to file if outfile is set
@@ -139,21 +140,21 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
 
         if chunksize > 1:
             years, mean = dataset_smoother(dataset_years, mean, chunksize)
-            hc5.logging_debug("years: \\\n{}".format(np.array(years)))
-            hc5.logging_debug("temperatures ({}): \\\n{}".format(region, mean))
-            hc5.logging_debug("delta ({}): \\\n{}".format(years[-1], mean[-1]))
+            hc5.logging_debug(f"years: \\\n{np.array(years)}")
+            hc5.logging_debug(f"temperatures ({region}): \\\n{mean}")
+            hc5.logging_debug(f"delta ({years[-1]}): \\\n{mean[-1]}")
         else:
             years = dataset_years
             plt.fill_between(years, lower, upper, color="lightgray")
 
             anomaly_current[region] = dataset_current_anomaly(mean)
             anomaly_max[region] = dataset_max_anomaly(mean)
-            hc5.logging_debug("Current anomalies: {}".format(anomaly_current[region]))
-            hc5.logging_debug("Max anomalies: {}".format(anomaly_max[region]))
+            hc5.logging_debug(f"Current anomalies: {anomaly_current[region]}")
+            hc5.logging_debug(f"Max anomalies: {anomaly_max[region]}")
 
             if annotate > 1:
                 plt.annotate(
-                    "{0:.2f}°C".format(anomaly_current[region]),
+                    f"{anomaly_current[region]:.2f}°C",
                     xy=(years[-1] - 2, anomaly_current[region] - 0.15),
                     fontsize=6,
                     horizontalalignment="left",
@@ -171,30 +172,24 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
         linestyles="dotted",
     )
 
-    plt.title(
-        (
-            "HadCRUT5: land and sea temperature anomalies relative to {}".format(
-                hc5.dataset_period
-            )
-        )
-    )
+    plt.title(f"HadCRUT5: land and sea temperature anomalies relative to {hc5.dataset_period}")
     plt.xlabel("year", fontsize=10)
 
-    ylabel = "{} Temperature Anomalies in °C".format(hc5.dataset_datatype.capitalize())
+    ylabel = f"{hc5.dataset_datatype.capitalize()} Temperature Anomalies in °C"
 
     if chunksize > 1:
-        ylabel += " ({}-year averages)".format(chunksize)
+        ylabel += f" ({chunksize}-year averages)"
     else:
         current = anomaly_current.get(hc5.GLOBAL_REGION)
         maximum = anomaly_max.get(hc5.GLOBAL_REGION)
 
         if annotate > 0 and current and maximum:
             current_year = trunc(hc5.dataset_years()[-1])
+            facecolor = "blue" if current <= 0 else "red"
             plt.annotate(
                 (
-                    "current global anomaly ({0}): {1:+.2f}°C, max: {2:+.2f}°C".format(
-                        current_year, current, maximum
-                    )
+                    f"current global anomaly ({current_year}): "
+                    f"{current:+.2f}°C, max: {maximum:+.2f}°C"
                 ),
                 xy=(0.98, 0.03),
                 xycoords="axes fraction",
@@ -202,7 +197,7 @@ def plotline(hc5, chunksize, annotate, outfile, verbose):
                 horizontalalignment="right",
                 verticalalignment="bottom",
                 bbox={
-                    "facecolor": "{}".format("blue" if current <= 0 else "red"),
+                    "facecolor": facecolor,
                     "alpha": 0.3,
                     "pad": 5,
                 },
@@ -253,7 +248,6 @@ def main():
         smoother,
         int(args.annotate) if args.annotate else 1,
         args.outfile,
-        args.verbose,
     )
 
 

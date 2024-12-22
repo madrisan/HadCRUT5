@@ -81,7 +81,7 @@ def plotbar(period, outfile, verbose):
     plt.style.use("dark_background")
     _, ax = plt.subplots()
 
-    cmap = plt.cm.jet  # or plt.cm.bwr
+    cmap = plt.cm.jet  # or plt.cm.bwr # pylint: disable=no-member
     norm = matplotlib.colors.Normalize(vmin=-1, vmax=max(mean))
     colors = cmap(norm(mean))
 
@@ -94,16 +94,15 @@ def plotbar(period, outfile, verbose):
 
     upper, left = 0.95, 0.025
     last_year = years[-1]
-
-    text_props = dict(
-        horizontalalignment="left", verticalalignment="top", transform=ax.transAxes
-    )
+    text_props = {
+        "horizontalalignment": "left",
+        "verticalalignment": "top",
+        "transform": ax.transAxes,
+    }
     plt.text(
         left,
         upper,
-        "\n".join(
-            (r"Global average temperature difference *", r"1850-{}".format(last_year))
-        ),
+        "\n".join((r"Global average temperature difference *", f"1850-{last_year}")),
         fontdict=fontxl,
         linespacing=1.2,
         **text_props,
@@ -113,7 +112,7 @@ def plotbar(period, outfile, verbose):
         upper - 0.125,
         "\n".join(
             (
-                r"(*) Compared to {} pre-industrial levels".format(period),
+                f"(*) Compared to {period} pre-industrial levels",
                 r"Data source - HadCRUT5",
             )
         ),

@@ -10,9 +10,10 @@ datasets.  See: https://www.metoffice.gov.uk/hadobs/hadcrut5/
 import argparse
 import json
 import logging
+import sys
+
 import numpy as np
 import requests
-import sys
 
 # pylint: disable=E0611
 from netCDF4 import Dataset as nc_Dataset
@@ -29,8 +30,9 @@ __status__ = "stable"
 
 def copyleft(descr):
     """Print the Copyright message and License"""
-    return "{} v{} ({})\n{} <{}>\nLicense: {}".format(
-        descr, __version__, __status__, __copyright__, __email__, __license__
+    return (
+        f"{descr} v{__version__} ({__status__})\n"
+        "{__copyright__} <{__email__}>\nLicense: {__license__}"
     )
 
 
@@ -71,9 +73,9 @@ class HadCRUT5:
         verbose=False,
     ):
         if datatype not in self._VALID_DATATYPES:
-            raise Exception(('Unsupported time series type "{}"'.format(datatype)))
+            raise ValueError(f'Unsupported time series type "{datatype}"')
         if period not in self._VALID_PERIODS:
-            raise Exception(('Unsupported reference period: "{}"'.format(period)))
+            raise ValueError(f'Unsupported reference period: "{period}"')
 
         # will be populated by datasets_load()
         self._datasets = {}
@@ -89,25 +91,18 @@ class HadCRUT5:
         self._verbose = verbose
 
         self._global_filename = (
-            "HadCRUT.{}.analysis.summary_series.global.{}.nc".format(
-                self._DATASET_VERSION, datatype
-            )
+            f"HadCRUT.{self._DATASET_VERSION}.analysis.summary_series.global.{datatype}.nc"
         )
         self._northern_hemisphere_filename = (
-            "HadCRUT.{}.analysis.summary_series.northern_hemisphere.{}.nc".format(
-                self._DATASET_VERSION, datatype
-            )
+            f"HadCRUT.{self._DATASET_VERSION}."
+            f"analysis.summary_series.northern_hemisphere.{datatype}.nc"
         )
         self._southern_hemisphere_filename = (
-            "HadCRUT.{}.analysis.summary_series.southern_hemisphere.{}.nc".format(
-                self._DATASET_VERSION, datatype
-            )
+            f"HadCRUT.{self._DATASET_VERSION}."
+            f"analysis.summary_series.southern_hemisphere.{datatype}.nc"
         )
-
         self._logging_level = logging.DEBUG if self._verbose else logging.INFO
-        logging.basicConfig(
-            level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s"
-        )
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
         self._logger = logging.getLogger(__name__)
 
     def datasets_download(self):
@@ -134,11 +129,7 @@ class HadCRUT5:
         def dataset_metadata_dump(dataset_name, dataset):
             metadata = dataset["metadata"]
             self.logging_debug(
-                (
-                    'Metadata for "{}" dataset:\n{}'.format(
-                        dataset_name, json.dumps(metadata, indent=2)
-                    )
-                ),
+                (f'Metadata for "{dataset_name}" dataset:\n{json.dumps(metadata, indent=2)}'),
             )
 
         if self._enable_global:
@@ -182,29 +173,19 @@ class HadCRUT5:
                 norm_temp = np.mean(temperatures[30 * factor : 70 * factor + 1])
             else:
                 # this should never happen...
-                raise Exception(('Unsupported period "{}"'.format(self._period)))
+                raise ValueError(f'Unsupported period "{self._period}"')
 
             self.logging_debug(
-                (
-                    "The mean anomaly in {0} is about {1:.8f}°C".format(
-                        self._period, norm_temp
-                    )
-                ),
+                "The mean anomaly in {self._period} is about {norm_temp:.8f}°C"
             )
             return norm_temp
 
-        for region in self._datasets:
-            mean = self._datasets[region]["variables"]["tas_mean"]
-            self.logging_debug(
-                (
-                    "dataset ({}): mean ({} entries) \\\n{}".format(
-                        region, len(mean), mean[:]
-                    )
-                ),
-            )
+        for region, data in self._datasets.items():
+            mean = data["variables"]["tas_mean"]
+            self.logging_debug(f"dataset ({region}): mean ({len(mean)} entries) \\\n{mean[:]}")
 
-            lower = self._datasets[region]["variables"]["tas_lower"]
-            upper = self._datasets[region]["variables"]["tas_upper"]
+            lower = data["variables"]["tas_lower"]
+            upper = data["variables"]["tas_upper"]
 
             norm_temp = normalization_value(mean)
 
@@ -214,11 +195,7 @@ class HadCRUT5:
                 "upper": np.array(upper) - norm_temp,
             }
             self.logging_debug(
-                (
-                    "normalized dataset ({}): mean \\\n{}".format(
-                        region, np.array(mean) - norm_temp
-                    )
-                ),
+                f"normalized dataset ({region}): mean \\\n{np.array(mean) - norm_temp}"
             )
 
     def datasets_regions(self):
@@ -236,27 +213,25 @@ class HadCRUT5:
 
     def _hadcrut5_data_url(self, filename):
         site = "https://www.metoffice.gov.uk"
-        path = "/hadobs/hadcrut5/data/HadCRUT.{}/analysis/diagnostics/".format(
-            self._DATASET_VERSION
-        )
-        url = "{}{}{}".format(site, path, filename)
+        path = f"/hadobs/hadcrut5/data/HadCRUT.{self._DATASET_VERSION}/analysis/diagnostics/"
+        url = f"{site}{path}{filename}"
         return url
 
     def _wget_dataset_file(self, filename):
         """Download a netCDFv4 HadCRUT5 file if not already found locally"""
         try:
-            with open(filename):
+            with open(filename, encoding="utf-8"):
                 if self._verbose:
-                    logging.info("Using the local dataset file: {}".format(filename))
+                    logging.info("Using the local dataset file: %s", filename)
         except IOError:
             if self._verbose:
-                logging.info("Downloading {} ...".format(filename))
+                logging.info("Downloading %s ...", filename)
 
             url_dataset = self._hadcrut5_data_url(filename)
             try:
-                response = requests.get(url_dataset, stream=True)
-            except Exception as e:
-                logging.error(f"{e}")
+                response = requests.get(url_dataset, stream=True, timeout=10)
+            except requests.exceptions.RequestException as e:
+                logging.error(str(e))
                 sys.exit(1)
 
             # Throw an error for bad status codes
@@ -302,7 +277,7 @@ class HadCRUT5:
         mean = self._datasets[region]["variables"]["tas_mean"][:]
         factor = 1 / 12 if self.is_monthly_dataset else 1
         years = [1850 + (y * factor) for y in range(len(mean))]
-        self.logging_debug("years: \\\n{}".format(np.array(years)))
+        self.logging_debug(f"years: \\\n{np.array(years)}")
         return years
 
     @property
