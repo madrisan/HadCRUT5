@@ -175,9 +175,7 @@ class HadCRUT5:
                 # this should never happen...
                 raise ValueError(f'Unsupported period "{self._period}"')
 
-            self.logging_debug(
-                "The mean anomaly in {self._period} is about {norm_temp:.8f}°C"
-            )
+            self.logging_debug("The mean anomaly in {self._period} is about {norm_temp:.8f}°C")
             return norm_temp
 
         for region, data in self._datasets.items():
