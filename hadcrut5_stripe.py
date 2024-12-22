@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright (c) 2023 Davide Madrisan <d.madrisan@proton.me>
+# Copyright (c) 2023-2024 Davide Madrisan <d.madrisan@proton.me>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
