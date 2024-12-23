@@ -1,8 +1,8 @@
 name: lint
 on: [push, pull_request]
 jobs:
-  run-linters:
-    name: Run linters
+  ci:
+    name: Run black and pylint tools
     runs-on: ubuntu-latest
 
     steps:
@@ -12,7 +12,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+          python-version: 3.12
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
 
       - name: Install Python dependencies
         run: pip install black flake8
@@ -23,3 +28,7 @@ jobs:
           auto_fix: false
           black: true
           flake8: false
+
+      - name: Analysing the code with pylint
+        run: |
+          uv run pylint --output-format=text ./**/*.py

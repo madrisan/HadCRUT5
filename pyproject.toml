@@ -13,6 +13,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "anybadge>=1.14.0",
     "black>=24.10.0",
     "mypy>=1.14.0",
     "pylint>=3.3.2",

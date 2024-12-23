@@ -2,6 +2,18 @@ version = 1
 requires-python = ">=3.12"
 
 [[package]]
+name = "anybadge"
+version = "1.14.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a3/f2/9f55245d6f456b661b38650767410f3b51d66a8530f0e0a43909bd475165/anybadge-1.14.0.tar.gz", hash = "sha256:47f06e0a6320d3e5eac55c712dc0bab71b9ed85353c591d448653c5a0740783f", size = 29606 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f7/44/71df611ee7e19c852caa829bac653662dafec909dbe3e1b99b5ad419cefc/anybadge-1.14.0-py3-none-any.whl", hash = "sha256:8711a7f7f45317c62a460f14084f005ba665cbebdf2a94e7df53bc3ab35df4c9", size = 27258 },
+]
+
+[[package]]
 name = "astroid"
 version = "3.3.6"
 source = { registry = "https://pypi.org/simple" }
@@ -485,6 +497,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "anybadge" },
     { name = "black" },
     { name = "mypy" },
     { name = "pylint" },
@@ -501,6 +514,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "anybadge", specifier = ">=1.14.0" },
     { name = "black", specifier = ">=24.10.0" },
     { name = "mypy", specifier = ">=1.14.0" },
     { name = "pylint", specifier = ">=3.3.2" },

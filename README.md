@@ -1,5 +1,10 @@
 # Visualize the HadCRUT5 temperature datasets
 
+![Release Status](https://img.shields.io/badge/status-stable-brightgreen.svg)
+![Pylint](images/pylint.svg)
+[![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://spdx.org/licenses/GPL-3.0-only.html)
+[![GitHub stars](https://img.shields.io/github/stars/madrisan/HadCRUT5.svg?style=social)](https://github.com/madrisan/HadCRUT5/stargazers)
+
 > HadCRUT5 is a gridded dataset of global historical surface temperature anomalies relative to a 1961-1990 reference period.
 > Data are available for each month from January 1850 onwards, on a 5 degree grid and as global and regional average time series.
 > The dataset is a collaborative product of the Met Office Hadley Centre and the Climatic Research Unit at the University of East Anglia.
