@@ -6,13 +6,15 @@
 Display a bar plot of the HadCRUT5 Global temperature dataset.
 """
 
+import argparse
+
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
 from hadcrut5lib import argparser, HadCRUT5
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """This function parses and return arguments passed in"""
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
@@ -49,7 +51,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def plotbar(period, outfile, verbose):
+# mypy: disable-error-code="misc, attr-defined"
+def plotbar(period: str, outfile: str, verbose: bool):
     """
     Create a bar plot for the specified period and diplay it or save it to file
     if outfile is set
@@ -81,7 +84,8 @@ def plotbar(period, outfile, verbose):
     plt.style.use("dark_background")
     _, ax = plt.subplots()
 
-    cmap = plt.cm.jet  # or plt.cm.bwr # pylint: disable=no-member
+    # pylint: disable=no-member
+    cmap = plt.cm.jet  # or plt.cm.bwr
     norm = matplotlib.colors.Normalize(vmin=-1, vmax=max(mean))
     colors = cmap(norm(mean))
 

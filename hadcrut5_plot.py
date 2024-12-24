@@ -6,7 +6,9 @@
 Display a plot of the HadCRUT5 temperature dataset.
 """
 
+import argparse
 from math import trunc
+from typing import List
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -15,7 +17,7 @@ import numpy as np
 from hadcrut5lib import argparser, HadCRUT5
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """This function parses and return arguments passed in"""
     descr = "Parse and plot the HadCRUT5 temperature datasets"
     examples = [
@@ -99,17 +101,17 @@ def parse_args():
     return parser.parse_args()
 
 
-def dataset_current_anomaly(temperatures):
+def dataset_current_anomaly(temperatures: List[float]) -> float:
     """Return the current anomaly"""
     return temperatures[-1]
 
 
-def dataset_max_anomaly(temperatures):
+def dataset_max_anomaly(temperatures: List[float]) -> float:
     """Return the maximum anomaly with respect to 'temperatures'"""
     return np.max(temperatures)
 
 
-def dataset_smoother(years, temperatures, chunksize):
+def dataset_smoother(years: List[int | float], temperatures: List[float], chunksize: int):
     """Make the lines smoother by using {chunksize}-year means"""
     data_range = range((len(years) + chunksize - 1) // chunksize)
     subset_years = [years[i * chunksize] for i in data_range]
@@ -120,7 +122,7 @@ def dataset_smoother(years, temperatures, chunksize):
     return subset_years, subset_temperatures
 
 
-def plotline(hc5, chunksize, annotate, outfile):
+def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str):
     """
     Create a plot for the specified period and arguments and diplay it or save
     it to file if outfile is set

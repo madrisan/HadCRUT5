@@ -6,6 +6,9 @@
 Display a stripe image of the HadCRUT5 Global temperature dataset.
 """
 
+import argparse
+from typing import List
+
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import ListedColormap
@@ -14,7 +17,7 @@ from matplotlib.patches import Rectangle
 from hadcrut5lib import argparser, HadCRUT5
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """This function parses and return arguments passed in"""
     descr = "Parse and plot a stripe image of the HadCRUT5 temperature datasets"
     examples = [
@@ -59,7 +62,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def plotstripe(region, outfile, labels, verbose):
+def plotstripe(region: str, outfile: str, labels: bool, verbose: bool):
     """
     Create a stripe plot for the specified period and diplay it or save it to
     file if outfile is set
@@ -74,7 +77,7 @@ def plotstripe(region, outfile, labels, verbose):
 
     years = hc5.dataset_years()
     yfirst, ylast = years[0], years[-1]
-    yrange = ylast - yfirst
+    yrange = int(ylast - yfirst)
 
     regions_switch = {
         "global": hc5.GLOBAL_REGION,
@@ -134,7 +137,7 @@ def plotstripe(region, outfile, labels, verbose):
         )
 
         ticks = [0, 0.2, 0.4, 0.6, 0.8, 1]
-        xlabels = [round(yfirst + x * yrange) for x in ticks]
+        xlabels: List[str] = [str(round(yfirst + x * yrange)) for x in ticks]
         plt.xticks(ticks, xlabels, fontweight="bold", fontsize=12)
     else:
         ax.get_xaxis().set_visible(False)

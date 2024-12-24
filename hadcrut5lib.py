@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import sys
+from typing import Dict, List, Mapping, Tuple
 
 import numpy as np
 import requests
@@ -28,7 +29,7 @@ __email__ = "d.madrisan@proton.me"
 __status__ = "stable"
 
 
-def copyleft(descr):
+def copyleft(descr: str) -> str:
     """Print the Copyright message and License"""
     return (
         f"{descr} v{__version__} ({__status__})\n"
@@ -36,7 +37,7 @@ def copyleft(descr):
     )
 
 
-def argparser(descr, examples):
+def argparser(descr: str, examples: List[str]) -> argparse.ArgumentParser:
     """Return a new ArgumentParser object"""
     return argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -49,16 +50,16 @@ def argparser(descr, examples):
 class HadCRUT5:
     """Class for parsing and plotting HadCRUT5 datasets"""
 
-    # current dataset version
     _DATASET_VERSION = "5.0.2.0"
+    """current dataset version"""
 
-    # list of all the available data types
     _DEFAULT_DATATYPE = "annual"
     _VALID_DATATYPES = [_DEFAULT_DATATYPE, "monthly"]
+    """list of all the available data types"""
 
-    # list of all the valid periods
     _DEFAULT_PERIOD = "1961-1990"
     _VALID_PERIODS = [_DEFAULT_PERIOD, "1850-1900", "1880-1920"]
+    """list of all the valid periods"""
 
     GLOBAL_REGION = "Global"
     NORTHERN_REGION = "Northern Hemisphere"
@@ -114,10 +115,10 @@ class HadCRUT5:
         if self._enable_southern:
             self._wget_dataset_file(self._southern_hemisphere_filename)
 
-    def datasets_load(self):
+    def datasets_load(self) -> None:
         """Load all the netCDFv4 datasets"""
 
-        def dataset_load(dataset_filename):
+        def dataset_load(dataset_filename: str) -> Dict:
             """Load the data provided by the netCDFv4 file 'dataset_filename'"""
             dataset = nc_Dataset(dataset_filename)
             return {
@@ -126,7 +127,7 @@ class HadCRUT5:
                 "variables": dataset.variables,
             }
 
-        def dataset_metadata_dump(dataset_name, dataset):
+        def dataset_metadata_dump(dataset_name: str, dataset) -> None:
             metadata = dataset["metadata"]
             self.logging_debug(
                 (f'Metadata for "{dataset_name}" dataset:\n{json.dumps(metadata, indent=2)}'),
@@ -145,14 +146,14 @@ class HadCRUT5:
             self._datasets[region] = dataset_load(self._southern_hemisphere_filename)
             dataset_metadata_dump(region, self._datasets[region])
 
-    def datasets_normalize(self):
+    def datasets_normalize(self) -> None:
         """
         Normalize the temperature means to the required time period.
         Set _datasets_normalized with a tuple containing lower, mean, and upper
         temperatures for every enabled region
         """
 
-        def normalization_value(temperatures):
+        def normalization_value(temperatures: List[float]) -> float:
             """
             Return the value to be substracted to temperatures in order to
             obtain a mean-centered dataset for the required period
@@ -176,7 +177,7 @@ class HadCRUT5:
                 raise ValueError(f'Unsupported period "{self._period}"')
 
             self.logging_debug("The mean anomaly in {self._period} is about {norm_temp:.8f}°C")
-            return norm_temp
+            return float(norm_temp)
 
         for region, data in self._datasets.items():
             mean = data["variables"]["tas_mean"]
@@ -196,26 +197,26 @@ class HadCRUT5:
                 f"normalized dataset ({region}): mean \\\n{np.array(mean) - norm_temp}"
             )
 
-    def datasets_regions(self):
+    def datasets_regions(self) -> Mapping[str, object]:
         """Return the dataset regions set by the user at command-line"""
         return self._datasets.keys()
 
-    def logging(self, message):
+    def logging(self, message: str) -> None:
         """Print a message"""
         logging.info(message)
 
-    def logging_debug(self, message):
+    def logging_debug(self, message: str) -> None:
         """Print a message when in verbose mode only"""
         if self._verbose:
             logging.info(message)
 
-    def _hadcrut5_data_url(self, filename):
+    def _hadcrut5_data_url(self, filename: str) -> str:
         site = "https://www.metoffice.gov.uk"
         path = f"/hadobs/hadcrut5/data/HadCRUT.{self._DATASET_VERSION}/analysis/diagnostics/"
         url = f"{site}{path}{filename}"
         return url
 
-    def _wget_dataset_file(self, filename):
+    def _wget_dataset_file(self, filename: str) -> None:
         """Download a netCDFv4 HadCRUT5 file if not already found locally"""
         try:
             with open(filename, encoding="utf-8"):
@@ -240,19 +241,19 @@ class HadCRUT5:
                     handle.write(block)
 
     @property
-    def dataset_datatype(self):
+    def dataset_datatype(self) -> str:
         """Return the datatype string"""
         return self._datatype
 
     @property
-    def dataset_history(self):
+    def dataset_history(self) -> str:
         """Return the datatype history from metadata"""
         # The datasets have all the same length so choose the first one
         region = list(self._datasets.keys())[0]
         metadata = self._datasets[region]["metadata"]
         return metadata.get("history")
 
-    def dataset_normalized_data(self, region):
+    def dataset_normalized_data(self, region) -> Tuple[List[float], List[float], List[float]]:
         """Return the dataset data normalized for the specified region"""
         lower = self._datasets_normalized[region]["lower"]
         mean = self._datasets_normalized[region]["mean"]
@@ -260,11 +261,11 @@ class HadCRUT5:
         return (lower, mean, upper)
 
     @property
-    def dataset_period(self):
+    def dataset_period(self) -> str:
         """Return the dataset period as a string"""
         return self._period
 
-    def dataset_years(self):
+    def dataset_years(self) -> List[int|float]:
         """
         Return an array of years corresponding of the loaded datasets.
         If the original dataset packages monthly data, the returning vector
@@ -279,7 +280,7 @@ class HadCRUT5:
         return years
 
     @property
-    def is_monthly_dataset(self):
+    def is_monthly_dataset(self) -> bool:
         """
         Return True if the loaded dataset provide monthly data,
         False otherwise
