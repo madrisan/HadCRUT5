@@ -265,7 +265,7 @@ class HadCRUT5:
         """Return the dataset period as a string"""
         return self._period
 
-    def dataset_years(self) -> List[int|float]:
+    def dataset_years(self) -> List[int | float]:
         """
         Return an array of years corresponding of the loaded datasets.
         If the original dataset packages monthly data, the returning vector
