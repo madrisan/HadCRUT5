@@ -29,6 +29,10 @@ jobs:
           black: true
           flake8: false
 
-      - name: Analysing the code with pylint
+      - name: Python type hinting and annotations checks with Mypy
+        run: |
+          uv run mypy *.py
+
+      - name: Python code analysis with Pylint
         run: |
           uv run pylint --output-format=text ./**/*.py
