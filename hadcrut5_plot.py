@@ -206,7 +206,7 @@ def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str):
             )
 
     plt.annotate(
-        hc5.dataset_history,
+        f"{hc5.dataset_history} (version {hc5.dataset_version})",
         xy=(0.01, 0.8),
         xycoords="axes fraction",
         fontsize=8,

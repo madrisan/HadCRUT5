@@ -265,6 +265,11 @@ class HadCRUT5:
         """Return the dataset period as a string"""
         return self._period
 
+    @property
+    def dataset_version(self) -> str:
+        """Return the dataset version as a string"""
+        return self._DATASET_VERSION
+
     def dataset_years(self) -> List[int | float]:
         """
         Return an array of years corresponding of the loaded datasets.
