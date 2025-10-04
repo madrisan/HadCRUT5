@@ -9,7 +9,7 @@
 > Data are available for each month from January 1850 onwards, on a 5 degree grid and as global and regional average time series.
 > The dataset is a collaborative product of the Met Office Hadley Centre and the Climatic Research Unit at the University of East Anglia.
 >
-> The current version of HadCRUT5 is HadCRUT.5.0.2.0, available from the download page.
+> The current version of HadCRUT5 is HadCRUT.5.1.0.0, available from the download page.
 >
 > &mdash; source: [HadCRUT5 Index](https://www.metoffice.gov.uk/hadobs/hadcrut5/index.html)
 
@@ -17,11 +17,11 @@ A detailed description of the datasets can be found in the
 [`Answers to Frequently Asked Questions`](https://crudata.uea.ac.uk/cru/data/temperature/).
 
 List of the datafiles that are loaded by the Python script:
- * `HadCRUT.5.0.2.0.analysis.summary_series.global.annual.nc`
- * `HadCRUT.5.0.2.0.analysis.summary_series.northern_hemisphere.annual.nc`
- * `HadCRUT.5.0.2.0.analysis.summary_series.southern_hemisphere.annual.nc`
+ * `HadCRUT.5.1.0.0.analysis.summary_series.global.annual.nc`
+ * `HadCRUT.5.1.0.0.analysis.summary_series.northern_hemisphere.annual.nc`
+ * `HadCRUT.5.1.0.0.analysis.summary_series.southern_hemisphere.annual.nc`
 
-HadCRUT5 data are downloaded from: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.0.2.0/download.html
+HadCRUT5 data are downloaded from: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.1.0.0/download.html
 
 ## Plot of the temperature anomalies
 

@@ -24,7 +24,7 @@ from netCDF4 import Dataset as nc_Dataset
 __author__ = "Davide Madrisan"
 __copyright__ = "Copyright (C) 2020-2025 Davide Madrisan"
 __license__ = "GNU General Public License v3.0"
-__version__ = "2024.1"
+__version__ = "2025.1"
 __email__ = "d.madrisan@proton.me"
 __status__ = "stable"
 
@@ -50,7 +50,7 @@ def argparser(descr: str, examples: List[str]) -> argparse.ArgumentParser:
 class HadCRUT5:
     """Class for parsing and plotting HadCRUT5 datasets"""
 
-    _DATASET_VERSION = "5.0.2.0"
+    _DATASET_VERSION = "5.1.0.0"
     """current dataset version"""
 
     _DEFAULT_DATATYPE = "annual"
