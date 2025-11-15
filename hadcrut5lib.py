@@ -33,7 +33,7 @@ def copyleft(descr: str) -> str:
     """Print the Copyright message and License"""
     return (
         f"{descr} v{__version__} ({__status__})\n"
-        "{__copyright__} <{__email__}>\nLicense: {__license__}"
+        f"{__copyright__} <{__email__}>\nLicense: {__license__}"
     )
 
 
