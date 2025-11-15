@@ -30,4 +30,10 @@ echo "creating stripe image ..."
     --region global \
     --outfile plots/HadCRUT5-global-stripe.png
 
+echo "creating plot closing in to 1.5°C ..."
+./hadcrut5_close.py \
+    --period "1880-1920" \
+    --region global \
+    --outfile plots/HadCRUT5-global-threshold-1880-1920.png
+
 echo "done."
