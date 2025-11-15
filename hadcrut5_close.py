@@ -94,13 +94,12 @@ def plotline(hc5: HadCRUT5, region: str, outfile: str, threshold):
     )
 
     ymin = min(mean)
-    ymax = max(mean)
     plt.imshow(
         np.linspace(0, 1, 256).reshape(-1, 1),
         origin="lower",
         aspect="auto",
         cmap="coolwarm",
-        extent=[years[0], years[-1], ymin, 2.0],
+        extent=(years[0], years[-1], ymin, 2.0),
     )
     plt.fill_between(years, ymin, mean, color="w")
 
