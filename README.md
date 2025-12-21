@@ -165,6 +165,36 @@ $ ./hadcrut5_stripe.py --region global
 ```
 ![HadCRUT5 global warming stripe](plots/HadCRUT5-global-stripe.png)
 
+## hadcrut5_close.py &mdash; Script usage
+
+```
+usage: hadcrut5_close.py [-h] [-f OUTFILE] [-p PERIOD] [-r {global,northern,southern}] [-v]
+
+Parse and plot the approach of HadCRUT5 dataset to a threshold temperature v2025.1 (stable)
+Copyright (C) 2020-2025 Davide Madrisan <d.madrisan@proton.me>
+License: GNU General Public License v3.0
+
+options:
+  -h, --help            show this help message and exit
+  -f, --outfile OUTFILE
+                        name of the output PNG file
+  -p, --period PERIOD   show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920
+  -r, --region {global,northern,southern}
+                        select between Global (default), Northern, or Southern Temperatures
+  -v, --verbose         make the operation more talkative
+
+examples:
+  hadcrut5_close.py
+  hadcrut5_close.py --period "1850-1900" --region global
+  hadcrut5_close.py --period "1880-1920" --outfile "HadCRUT5-1880-1920-threshold.png"
+```
+
+Below is a generated plot image for global anomalies related to the period `1880-1920` with a threshold set to 1.5°C.
+```
+$ ./hadcrut5_close.py --period "1880-1920" --region global
+```
+![HadCRUT5 global warming close](plots/HadCRUT5-global-threshold-1880-1920.png)
+
 # License
 
 The Python code of this project is released under the [GPL-3.0 license](https://github.com/madrisan/HadCRUT5/blob/main/LICENSE).
