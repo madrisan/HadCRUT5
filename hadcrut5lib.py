@@ -85,7 +85,7 @@ class HadCRUT5:
 
         self._datatype = datatype
 
-        (self._enable_global, self._enable_northern, self._enable_southern) = regions
+        self._enable_global, self._enable_northern, self._enable_southern = regions
 
         self._period = period
         self._smoother = smoother
