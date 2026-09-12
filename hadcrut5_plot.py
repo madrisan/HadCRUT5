@@ -135,6 +135,9 @@ def dataset_smoother(years: List[int | float], temperatures: List[float], chunks
 # warming. A None end year means "up to the last available year".
 TREND_PERIODS = [(1970, 2010, "black"), (2010, None, "red")]
 
+# How many years to project each trend line into the future
+TREND_FORECAST_YEARS = 10
+
 
 def dataset_linear_fit(
     years: List[int | float], temperatures: List[float], start_year: int, end_year: int
@@ -155,18 +158,26 @@ def dataset_linear_fit(
 def plot_trendlines(years: List[int | float], temperatures: List[float]):
     """
     Overlay the linear-fit trend lines defined in TREND_PERIODS, each one
-    extrapolated up to the last available year so that the accelerating
+    projected TREND_FORECAST_YEARS into the future so that the accelerating
     departure from the earlier trends is visible
     """
     last_year = trunc(float(np.max(years)))
 
     for start_year, end_year, color in TREND_PERIODS:
+        is_current_trend = end_year is None
         end_year = end_year or last_year
         if end_year <= start_year:
             continue
 
         slope, intercept = dataset_linear_fit(years, temperatures, start_year, end_year)
-        x = np.array([start_year, last_year])
+        forecast_year = last_year + TREND_FORECAST_YEARS
+        x = np.array([start_year, forecast_year])
+
+        label = f"{start_year}-{end_year} trend ({slope * 10:+.2f}°C/decade)"
+        if is_current_trend:
+            forecast_temp = slope * forecast_year + intercept
+            label += f", forecast {forecast_year}: {forecast_temp:+.2f}°C"
+
         plt.plot(
             x,
             slope * x + intercept,
@@ -175,8 +186,17 @@ def plot_trendlines(years: List[int | float], temperatures: List[float]):
             linewidth=1.4,
             alpha=0.8,
             zorder=1,
-            label=f"{start_year}-{end_year} trend ({slope * 10:+.2f}°C/decade)",
+            label=label,
         )
+
+        if is_current_trend:
+            plt.annotate(
+                f"{forecast_temp:.2f}°C",
+                xy=(forecast_year - 2, forecast_temp + 0.05),
+                fontsize=5,
+                horizontalalignment="left",
+                bbox={"facecolor": "red", "alpha": 0.3, "pad": 3},
+            )
 
 
 def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str, trends: bool):

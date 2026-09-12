@@ -104,6 +104,16 @@ $ ./hadcrut5_plot.py --annotate=2 --period "1880-1920" --trends --outfile plots/
 ```
 ![HadCRUT5 global anomalies with acceleration trend lines](plots/HadCRUT5-global-trends.png)
 
+The `2010-present` trend line is also extrapolated 10 years past the last available year, with a boxed annotation
+and a matching note in the legend showing the forecast temperature for that future year.
+
+This forecast value is *not* simply the last observed anomaly plus ten years of the slope. It is the regression
+line's own value, i.e. `slope × forecast_year + intercept`, projected forward. Because annual anomalies are noisy,
+the fitted trend line for the last available year rarely matches the actual observed anomaly for that same year
+exactly, so `forecast value != last observed anomaly + slope × decade`. Extrapolating from the regression line
+rather than from the last single (noisy) data point gives a more stable estimate of where the underlying trend is
+heading.
+
 ### Plots using the N-year mean data
 
 By adding the command-line option `--smoother N` you can create the same three plots, but using the N-year means data.
