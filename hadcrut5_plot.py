@@ -27,6 +27,7 @@ def parse_args() -> argparse.Namespace:
         '%(prog)s --period "1850-1900" --smoother 5',
         '%(prog)s --period "1880-1920" --outfile HadCRUT5-1880-1920.png',
         '%(prog)s --period "1880-1920" --time-series monthly --global',
+        '%(prog)s --period "1880-1920" --global --trends',
     ]
 
     parser = argparser(descr, examples)
@@ -83,6 +84,14 @@ def parse_args() -> argparse.Namespace:
         help="Southern Hemisphere Temperatures",
     )
     parser.add_argument(
+        "-r",
+        "--trends",
+        action="store_true",
+        dest="trends",
+        help="add linear-fit trend lines for 1970-2010 and 2010-present to "
+        "the Global Temperatures, showing the acceleration of global warming",
+    )
+    parser.add_argument(
         "-t",
         "--time-series",
         action="store",
@@ -122,7 +131,55 @@ def dataset_smoother(years: List[int | float], temperatures: List[float], chunks
     return subset_years, subset_temperatures
 
 
-def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str):
+# Periods used to fit the trend lines showing the acceleration of global
+# warming. A None end year means "up to the last available year".
+TREND_PERIODS = [(1970, 2010, "black"), (2010, None, "red")]
+
+
+def dataset_linear_fit(
+    years: List[int | float], temperatures: List[float], start_year: int, end_year: int
+):
+    """
+    Return the slope and intercept (in °C/year) of the linear fit of
+    'temperatures' over 'years' restricted to [start_year, end_year]
+    """
+    years_arr = np.array(years)
+    temperatures_arr = np.array(temperatures)
+    mask = (years_arr >= start_year) & (years_arr <= end_year)
+
+    slope, intercept = np.polyfit(years_arr[mask], temperatures_arr[mask], 1)
+
+    return slope, intercept
+
+
+def plot_trendlines(years: List[int | float], temperatures: List[float]):
+    """
+    Overlay the linear-fit trend lines defined in TREND_PERIODS, each one
+    extrapolated up to the last available year so that the accelerating
+    departure from the earlier trends is visible
+    """
+    last_year = trunc(float(np.max(years)))
+
+    for start_year, end_year, color in TREND_PERIODS:
+        end_year = end_year or last_year
+        if end_year <= start_year:
+            continue
+
+        slope, intercept = dataset_linear_fit(years, temperatures, start_year, end_year)
+        x = np.array([start_year, last_year])
+        plt.plot(
+            x,
+            slope * x + intercept,
+            color=color,
+            linestyle="dotted",
+            linewidth=1.4,
+            alpha=0.8,
+            zorder=1,
+            label=f"{start_year}-{end_year} trend ({slope * 10:+.2f}°C/decade)",
+        )
+
+
+def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str, trends: bool):
     """
     Create a plot for the specified period and arguments and diplay it or save
     it to file if outfile is set
@@ -139,6 +196,7 @@ def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str):
 
     for region in hc5.datasets_regions():
         lower, mean, upper = hc5.dataset_normalized_data(region)
+        raw_mean = mean
 
         if chunksize > 1:
             years, mean = dataset_smoother(dataset_years, mean, chunksize)
@@ -166,6 +224,9 @@ def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str):
         linewidth = 1 if hc5.is_monthly_dataset and chunksize < 2 else 2
         plt.plot(years, mean, linewidth=linewidth, markersize=12, label=region)
 
+        if trends and region == hc5.GLOBAL_REGION:
+            plot_trendlines(dataset_years, raw_mean)
+
     plt.hlines(
         0,
         np.min(dataset_years),
@@ -174,7 +235,10 @@ def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str):
         linestyles="dotted",
     )
 
-    plt.title(f"HadCRUT5: land and sea temperature anomalies relative to {hc5.dataset_period}")
+    plt.title(
+        f"HadCRUT5: land and sea temperature anomalies relative to {hc5.dataset_period}",
+        pad=20,
+    )
     plt.xlabel("year", fontsize=10)
 
     ylabel = f"{hc5.dataset_datatype.capitalize()} Temperature Anomalies in °C"
@@ -207,15 +271,15 @@ def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str):
 
     plt.annotate(
         f"{hc5.dataset_history} (version {hc5.dataset_version})",
-        xy=(0.01, 0.8),
+        xy=(0.5, 1.01),
         xycoords="axes fraction",
         fontsize=8,
-        horizontalalignment="left",
-        verticalalignment="top",
+        horizontalalignment="center",
+        verticalalignment="bottom",
     )
 
     plt.ylabel(ylabel, fontsize=10)
-    plt.legend()
+    plt.legend(fontsize=8)
 
     if outfile:
         plt.savefig(outfile, transparent=False)
@@ -250,6 +314,7 @@ def main():
         smoother,
         int(args.annotate) if args.annotate else 1,
         args.outfile,
+        args.trends,
     )
 
 

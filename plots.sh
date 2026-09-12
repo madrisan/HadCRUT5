@@ -18,6 +18,13 @@ for period in "1961-1990" "1850-1900" "1880-1920"; do
         --outfile plots/HadCRUT5-global-${period}.png
 done
 
+echo "creating trend-lines plot ..."
+./hadcrut5_plot.py \
+    --period "1880-1920" \
+    --annotate=2 \
+    --trends \
+    --outfile plots/HadCRUT5-global-trends.png
+
 echo "creating monthly plot ..."
 ./hadcrut5_plot.py \
     --period "1880-1920" \
