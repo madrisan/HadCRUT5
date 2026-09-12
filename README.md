@@ -36,27 +36,33 @@ with `uv run`. For example `uv run ./hadcrut5_plot.py`.
 
 ```
 $ ./hadcrut5_plot.py --help
-usage: hadcrut5_plot.py [-h] [-f OUTFILE] [-p PERIOD] [-m SMOOTHER] [-g] [-n] [-s] [-a ANNOTATE] [-v]
+usage: hadcrut5_plot.py [-h] [-a ANNOTATE] [-f OUTFILE] [-g] [-m SMOOTHER]
+                        [-n] [-p PERIOD] [-s] [-r] [-t TIME_SERIES] [-v]
 
-Parse and plot the HadCRUT5 temperature datasets v2024.1 (stable)
-Copyright (C) 2020-2025 Davide Madrisan <d.madrisan@proton.me>
+Parse and plot the HadCRUT5 temperature datasets v2026.1 (stable)
+Copyright (C) 2020-2026 Davide Madrisan <d.madrisan@proton.me>
 License: GNU General Public License v3.0
 
 options:
   -h, --help            show this help message and exit
-  -a ANNOTATE, --annotate ANNOTATE
-                        add temperature annotations (0: no annotations, 1 (default): bottom only, 2: all ones
-  -f OUTFILE, --outfile OUTFILE
+  -a, --annotate ANNOTATE
+                        add temperature annotations (0: no annotations, 1
+                        (default): bottom only, 2: all ones
+  -f, --outfile OUTFILE
                         name of the output PNG file
   -g, --global          plot the Global Temperatures
-  -m SMOOTHER, --smoother SMOOTHER
+  -m, --smoother SMOOTHER
                         make the lines smoother by using N-year means
   -n, --northern        Northern Hemisphere Temperatures
-  -p PERIOD, --period PERIOD
-                        show anomalies related to 1961-1990 (default), 1850-1900, or 1880-1920
+  -p, --period PERIOD   show anomalies related to 1961-1990 (default),
+                        1850-1900, or 1880-1920
   -s, --southern        Southern Hemisphere Temperatures
-  -t TIME_SERIES, --time-series TIME_SERIES
-                        do plot the "annual" time series (default) or the "monthly" one
+  -r, --trends          add linear-fit trend lines for 1970-2010 and
+                        2010-present to the Global Temperatures, showing the
+                        acceleration of global warming
+  -t, --time-series TIME_SERIES
+                        do plot the "annual" time series (default) or the
+                        "monthly" one
   -v, --verbose         make the operation more talkative
 
 examples:
@@ -66,6 +72,7 @@ examples:
   hadcrut5_plot.py --period "1850-1900" --smoother 5
   hadcrut5_plot.py --period "1880-1920" --outfile HadCRUT5-1880-1920.png
   hadcrut5_plot.py --period "1880-1920" --time-series monthly --global
+  hadcrut5_plot.py --period "1880-1920" --global --trends
 ```
 
 `hadcrut5_plot.py` select the period `1961-90` by default but supports (see the command-line switch`--period`) two other base periods found in the literature: `1850-1900`, and `1880-1920`.
@@ -84,6 +91,18 @@ $ ./hadcrut5_plot.py --annotate=2 --period "1850-1900" --outfile plots/HadCRUT5-
 $ ./hadcrut5_plot.py --annotate=2 --period "1880-1920" --outfile plots/HadCRUT5-1880-1920.png
 ```
 ![HadCRUT5 anomalies related to 1880-1920](plots/HadCRUT5-1880-1920.png)
+
+#### Plots showing the acceleration of global warming
+
+The command-line option `--trends` overlays two linear-fit trend lines on the Global Temperatures: one for `1970-2010`
+and one for `2010-present`, each labelled with its slope in °C/decade. Comparing the two makes the acceleration of
+global warming immediately visible: the more recent trend line is both steeper and clearly diverges above the older
+one.
+
+```
+$ ./hadcrut5_plot.py --annotate=2 --period "1880-1920" --trends --outfile plots/HadCRUT5-global-trends.png
+```
+![HadCRUT5 global anomalies with acceleration trend lines](plots/HadCRUT5-global-trends.png)
 
 ### Plots using the N-year mean data
 
