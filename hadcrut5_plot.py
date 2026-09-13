@@ -120,6 +120,11 @@ def dataset_max_anomaly(temperatures: List[float]) -> float:
     return np.max(temperatures)
 
 
+def dataset_max_anomaly_year(years: List[int | float], temperatures: List[float]) -> int:
+    """Return the year of the maximum anomaly with respect to 'temperatures'"""
+    return trunc(float(years[np.argmax(temperatures)]))
+
+
 def dataset_smoother(years: List[int | float], temperatures: List[float], chunksize: int):
     """Make the lines smoother by using {chunksize}-year means"""
     data_range = range((len(years) + chunksize - 1) // chunksize)
@@ -195,8 +200,35 @@ def plot_trendlines(years: List[int | float], temperatures: List[float]):
                 xy=(forecast_year - 2, forecast_temp + 0.05),
                 fontsize=5,
                 horizontalalignment="left",
-                bbox={"facecolor": "red", "alpha": 0.3, "pad": 3},
+                bbox={"facecolor": "lightgray", "alpha": 0.6, "pad": 3},
             )
+
+
+def annotate_current_global_anomaly(
+    hc5: HadCRUT5,
+    current: float,
+    maximum: float,
+    maximum_year: int,
+):
+    """Annotate the plot with the current and max global anomalies"""
+    current_year = trunc(hc5.dataset_years()[-1])
+    facecolor = "blue" if current <= 0 else "red"
+    plt.annotate(
+        (
+            f"current global anomaly ({current_year}): "
+            f"{current:+.2f}°C, max: {maximum:+.2f}°C ({maximum_year})"
+        ),
+        xy=(0.98, 0.03),
+        xycoords="axes fraction",
+        fontsize=8,
+        horizontalalignment="right",
+        verticalalignment="bottom",
+        bbox={
+            "facecolor": facecolor,
+            "alpha": 0.3,
+            "pad": 5,
+        },
+    )
 
 
 def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str, trends: bool):
@@ -211,6 +243,7 @@ def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str, trends:
     mpl.style.use("seaborn-v0_8-notebook")
     anomaly_current = {}
     anomaly_max = {}
+    anomaly_max_year = {}
 
     dataset_years = hc5.dataset_years()
 
@@ -229,6 +262,7 @@ def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str, trends:
 
             anomaly_current[region] = dataset_current_anomaly(mean)
             anomaly_max[region] = dataset_max_anomaly(mean)
+            anomaly_max_year[region] = dataset_max_anomaly_year(years, mean)
             hc5.logging_debug(f"Current anomalies: {anomaly_current[region]}")
             hc5.logging_debug(f"Max anomalies: {anomaly_max[region]}")
 
@@ -268,26 +302,10 @@ def plotline(hc5: HadCRUT5, chunksize: int, annotate: int, outfile: str, trends:
     else:
         current = anomaly_current.get(hc5.GLOBAL_REGION)
         maximum = anomaly_max.get(hc5.GLOBAL_REGION)
+        maximum_year = anomaly_max_year.get(hc5.GLOBAL_REGION)
 
         if annotate > 0 and current and maximum:
-            current_year = trunc(hc5.dataset_years()[-1])
-            facecolor = "blue" if current <= 0 else "red"
-            plt.annotate(
-                (
-                    f"current global anomaly ({current_year}): "
-                    f"{current:+.2f}°C, max: {maximum:+.2f}°C"
-                ),
-                xy=(0.98, 0.03),
-                xycoords="axes fraction",
-                fontsize=8,
-                horizontalalignment="right",
-                verticalalignment="bottom",
-                bbox={
-                    "facecolor": facecolor,
-                    "alpha": 0.3,
-                    "pad": 5,
-                },
-            )
+            annotate_current_global_anomaly(hc5, current, maximum, maximum_year)
 
     plt.annotate(
         f"{hc5.dataset_history} (version {hc5.dataset_version})",
