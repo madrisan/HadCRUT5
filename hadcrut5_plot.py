@@ -208,7 +208,7 @@ def annotate_current_global_anomaly(
     hc5: HadCRUT5,
     current: float,
     maximum: float,
-    maximum_year: int,
+    maximum_year: int | None,
 ):
     """Annotate the plot with the current and max global anomalies"""
     current_year = trunc(hc5.dataset_years()[-1])
