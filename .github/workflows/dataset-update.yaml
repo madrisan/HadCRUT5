@@ -1,0 +1,78 @@
+name: Check for HadCRUT5 dataset updates
+on:
+  schedule:
+    # every Saturday at 06:00 UTC
+    - cron: "0 6 * * 6"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  dataset-update:
+    name: Notify by email if the dataset changed
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Regenerate all plots with the latest dataset
+        run: uv run bash plots.sh
+
+      - name: Check whether any plot changed
+        id: diff
+        run: |
+          if git status --porcelain -- plots | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Read the dataset build date
+        if: steps.diff.outputs.changed == 'true'
+        id: dataset
+        run: |
+          build_date=$(uv run python -c "
+          from hadcrut5lib import HadCRUT5
+          hc5 = HadCRUT5(regions=(True, False, False))
+          hc5.datasets_load()
+          print(hc5.dataset_history.split('T')[0])
+          ")
+          echo "date=${build_date}" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue to trigger a GitHub notification email
+        if: steps.diff.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `HadCRUT5 dataset updated (${{ steps.dataset.outputs.date }})`,
+              assignees: ["madrisan"],
+              body: [
+                "The Met Office has published a newer revision of the ",
+                "HadCRUT5 dataset (built at `${{ steps.dataset.outputs.date }}`).",
+                "",
+                "Regenerating the plots locally (`./plots.sh`) showed differences ",
+                "versus what's currently committed under `plots/`.",
+                "",
+                "Run `./plots.sh` and commit the updated PNGs when convenient."
+              ].join("\n"),
+            })
