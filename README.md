@@ -224,6 +224,51 @@ $ ./hadcrut5_close.py --period "1880-1920" --region global
 ```
 ![HadCRUT5 global warming close](plots/HadCRUT5-global-threshold-1880-1920.png)
 
+## hadcrut5_animate.py &mdash; Script usage
+
+```
+$ ./hadcrut5_animate.py --help
+usage: hadcrut5_animate.py [-h] [-b BITRATE] [-f OUTFILE] [--fps FPS]
+                           [--hold HOLD] [-g] [-n] [-p PERIOD] [-s] [-v]
+
+Create an animated plot of the HadCRUT5 temperature datasets v2026.1 (stable)
+Copyright (C) 2020-2026 Davide Madrisan <d.madrisan@proton.me>
+License: GNU General Public License v3.0
+
+options:
+  -h, --help            show this help message and exit
+  -b, --bitrate BITRATE
+                        bitrate (in kbps) of the encoded video (default: 1800)
+  -f, --outfile OUTFILE
+                        name of the output MP4 file; if not set the animation
+                        is displayed interactively instead
+  --fps FPS             frames per second of the encoded video (default: 25)
+  --hold HOLD           seconds to hold the last frame at the end of the
+                        animation (default: 2.0)
+  -g, --global          plot the Global Temperatures
+  -n, --northern        Northern Hemisphere Temperatures
+  -p, --period PERIOD   show anomalies related to 1961-1990 (default),
+                        1850-1900, or 1880-1920
+  -s, --southern        Southern Hemisphere Temperatures
+  -v, --verbose         make the operation more talkative
+
+examples:
+  hadcrut5_animate.py
+  hadcrut5_animate.py --global
+  hadcrut5_animate.py --period "1880-1920"
+  hadcrut5_animate.py --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.mp4
+  hadcrut5_animate.py --fps 30 --hold 5 --outfile HadCRUT5-animation.mp4
+```
+
+This script requires `ffmpeg` to be installed, and reveals the selected regions year by year instead of drawing the
+whole time series at once. Without `--outfile` the animation is displayed interactively; with it, the animation is
+encoded to an MP4 file.
+
+```
+$ ./hadcrut5_animate.py --period "1880-1920" --outfile plots/HadCRUT5-1880-1920-animation.mp4
+```
+<video src="plots/HadCRUT5-1880-1920-animation.mp4" controls loop autoplay muted playsinline></video>
+
 # License
 
 The Python code of this project is released under the [GPL-3.0 license](https://github.com/madrisan/HadCRUT5/blob/main/LICENSE).
