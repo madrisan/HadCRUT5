@@ -43,4 +43,9 @@ echo "creating plot closing in to 1.5°C ..."
     --region global \
     --outfile plots/HadCRUT5-global-threshold-1880-1920.png
 
+echo "creating animated plot ..."
+./hadcrut5_animate.py \
+    --period "1880-1920" \
+    --outfile plots/HadCRUT5-1880-1920-animation.mp4
+
 echo "done."
