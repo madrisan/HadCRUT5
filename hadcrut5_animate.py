@@ -52,6 +52,7 @@ def parse_args() -> argparse.Namespace:
         "%(prog)s --global",
         '%(prog)s --period "1880-1920"',
         '%(prog)s --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.mp4',
+        '%(prog)s --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.gif',
         "%(prog)s --fps 30 --hold 5 --outfile HadCRUT5-animation.mp4",
     ]
 
@@ -63,15 +64,16 @@ def parse_args() -> argparse.Namespace:
         dest="bitrate",
         default=1800,
         type=int,
-        help="bitrate (in kbps) of the encoded video (default: 1800)",
+        help="bitrate (in kbps) of the encoded MP4 video, ignored for GIF "
+        "output (default: 1800)",
     )
     parser.add_argument(
         "-f",
         "--outfile",
         action="store",
         dest="outfile",
-        help="name of the output MP4 file; if not set the animation is "
-        "displayed interactively instead",
+        help="name of the output file (.mp4 or .gif); if not set the "
+        "animation is displayed interactively instead",
     )
     parser.add_argument(
         "--fps",
@@ -237,7 +239,14 @@ def animate(hc5: HadCRUT5, fps: int, bitrate: int, hold: float, outfile: str):
     )
 
     if outfile:
-        writer = animation.FFMpegWriter(fps=fps, bitrate=bitrate)
+        writer: animation.AbstractMovieWriter
+        if outfile.lower().endswith(".gif"):
+            # GitHub's Markdown renderer strips <video> tags for repo-hosted
+            # files, so a GIF (embeddable as a normal image) is required to
+            # show the animation inline in a README.
+            writer = animation.PillowWriter(fps=fps)
+        else:
+            writer = animation.FFMpegWriter(fps=fps, bitrate=bitrate)
         ani.save(outfile, writer=writer)
     else:
         plt.show()

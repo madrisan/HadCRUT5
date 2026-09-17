@@ -238,10 +238,11 @@ License: GNU General Public License v3.0
 options:
   -h, --help            show this help message and exit
   -b, --bitrate BITRATE
-                        bitrate (in kbps) of the encoded video (default: 1800)
+                        bitrate (in kbps) of the encoded MP4 video, ignored
+                        for GIF output (default: 1800)
   -f, --outfile OUTFILE
-                        name of the output MP4 file; if not set the animation
-                        is displayed interactively instead
+                        name of the output file (.mp4 or .gif); if not set the
+                        animation is displayed interactively instead
   --fps FPS             frames per second of the encoded video (default: 25)
   --hold HOLD           seconds to hold the last frame at the end of the
                         animation (default: 2.0)
@@ -257,17 +258,19 @@ examples:
   hadcrut5_animate.py --global
   hadcrut5_animate.py --period "1880-1920"
   hadcrut5_animate.py --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.mp4
+  hadcrut5_animate.py --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.gif
   hadcrut5_animate.py --fps 30 --hold 5 --outfile HadCRUT5-animation.mp4
 ```
 
-This script requires `ffmpeg` to be installed, and reveals the selected regions year by year instead of drawing the
-whole time series at once. Without `--outfile` the animation is displayed interactively; with it, the animation is
-encoded to an MP4 file.
+This script reveals the selected regions year by year instead of drawing the whole time series at once. Without
+`--outfile` the animation is displayed interactively. An `.mp4` output requires `ffmpeg` to be installed; a `.gif`
+output only needs Pillow (already a Matplotlib dependency). GitHub's Markdown renderer strips `<video>` tags for
+repo-hosted files, so the GIF format is what's embedded below.
 
 ```
-$ ./hadcrut5_animate.py --period "1880-1920" --outfile plots/HadCRUT5-1880-1920-animation.mp4
+$ ./hadcrut5_animate.py --period "1880-1920" --outfile plots/HadCRUT5-1880-1920-animation.gif
 ```
-<video src="plots/HadCRUT5-1880-1920-animation.mp4" controls loop autoplay muted playsinline></video>
+![HadCRUT5 animated plot of the temperature anomalies related to 1880-1920](plots/HadCRUT5-1880-1920-animation.gif)
 
 # License
 
