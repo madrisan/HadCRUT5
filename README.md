@@ -135,6 +135,54 @@ $ ./hadcrut5_plot.py --global --period "1880-1920" --time-series monthly
 ```
 ![HadCRUT5 monthly global anomalies related to 1880-1920 means](plots/HadCRUT5-monthly-global-1880-1920.png)
 
+## hadcrut5_animate.py &mdash; Script usage
+
+```
+$ ./hadcrut5_animate.py --help
+usage: hadcrut5_animate.py [-h] [-b BITRATE] [-f OUTFILE] [--fps FPS]
+                           [--hold HOLD] [-g] [-n] [-p PERIOD] [-s] [-v]
+
+Create an animated plot of the HadCRUT5 temperature datasets v2026.1 (stable)
+Copyright (C) 2020-2026 Davide Madrisan <d.madrisan@proton.me>
+License: GNU General Public License v3.0
+
+options:
+  -h, --help            show this help message and exit
+  -b, --bitrate BITRATE
+                        bitrate (in kbps) of the encoded MP4 video, ignored
+                        for GIF output (default: 1800)
+  -f, --outfile OUTFILE
+                        name of the output file (.mp4 or .gif); if not set the
+                        animation is displayed interactively instead
+  --fps FPS             frames per second of the encoded video (default: 25)
+  --hold HOLD           seconds to hold the last frame at the end of the
+                        animation (default: 2.0)
+  -g, --global          plot the Global Temperatures
+  -n, --northern        Northern Hemisphere Temperatures
+  -p, --period PERIOD   show anomalies related to 1961-1990 (default),
+                        1850-1900, or 1880-1920
+  -s, --southern        Southern Hemisphere Temperatures
+  -v, --verbose         make the operation more talkative
+
+examples:
+  hadcrut5_animate.py
+  hadcrut5_animate.py --global
+  hadcrut5_animate.py --period "1880-1920"
+  hadcrut5_animate.py --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.mp4
+  hadcrut5_animate.py --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.gif
+  hadcrut5_animate.py --fps 30 --hold 5 --outfile HadCRUT5-animation.mp4
+```
+
+This script reveals the selected regions year by year instead of drawing the whole time series at once. Without
+`--outfile` the animation is displayed interactively. An `.mp4` output requires `ffmpeg` to be installed; a `.gif`
+output only needs Pillow (already a Matplotlib dependency). GitHub's Markdown renderer strips `<video>` tags for
+repo-hosted files, so the GIF format is what's embedded below.
+
+```
+$ ./hadcrut5_animate.py --period "1880-1920" --outfile plots/HadCRUT5-1880-1920-animation.gif
+```
+![HadCRUT5 animated plot of the temperature anomalies related to 1880-1920](plots/HadCRUT5-1880-1920-animation.gif)
+
 ## hadcrut5_bars.py &mdash; Script usage
 
 ```
@@ -223,54 +271,6 @@ Below is a generated plot image for global anomalies related to the period `1880
 $ ./hadcrut5_close.py --period "1880-1920" --region global
 ```
 ![HadCRUT5 global warming close](plots/HadCRUT5-global-threshold-1880-1920.png)
-
-## hadcrut5_animate.py &mdash; Script usage
-
-```
-$ ./hadcrut5_animate.py --help
-usage: hadcrut5_animate.py [-h] [-b BITRATE] [-f OUTFILE] [--fps FPS]
-                           [--hold HOLD] [-g] [-n] [-p PERIOD] [-s] [-v]
-
-Create an animated plot of the HadCRUT5 temperature datasets v2026.1 (stable)
-Copyright (C) 2020-2026 Davide Madrisan <d.madrisan@proton.me>
-License: GNU General Public License v3.0
-
-options:
-  -h, --help            show this help message and exit
-  -b, --bitrate BITRATE
-                        bitrate (in kbps) of the encoded MP4 video, ignored
-                        for GIF output (default: 1800)
-  -f, --outfile OUTFILE
-                        name of the output file (.mp4 or .gif); if not set the
-                        animation is displayed interactively instead
-  --fps FPS             frames per second of the encoded video (default: 25)
-  --hold HOLD           seconds to hold the last frame at the end of the
-                        animation (default: 2.0)
-  -g, --global          plot the Global Temperatures
-  -n, --northern        Northern Hemisphere Temperatures
-  -p, --period PERIOD   show anomalies related to 1961-1990 (default),
-                        1850-1900, or 1880-1920
-  -s, --southern        Southern Hemisphere Temperatures
-  -v, --verbose         make the operation more talkative
-
-examples:
-  hadcrut5_animate.py
-  hadcrut5_animate.py --global
-  hadcrut5_animate.py --period "1880-1920"
-  hadcrut5_animate.py --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.mp4
-  hadcrut5_animate.py --period "1880-1920" --outfile HadCRUT5-1880-1920-animation.gif
-  hadcrut5_animate.py --fps 30 --hold 5 --outfile HadCRUT5-animation.mp4
-```
-
-This script reveals the selected regions year by year instead of drawing the whole time series at once. Without
-`--outfile` the animation is displayed interactively. An `.mp4` output requires `ffmpeg` to be installed; a `.gif`
-output only needs Pillow (already a Matplotlib dependency). GitHub's Markdown renderer strips `<video>` tags for
-repo-hosted files, so the GIF format is what's embedded below.
-
-```
-$ ./hadcrut5_animate.py --period "1880-1920" --outfile plots/HadCRUT5-1880-1920-animation.gif
-```
-![HadCRUT5 animated plot of the temperature anomalies related to 1880-1920](plots/HadCRUT5-1880-1920-animation.gif)
 
 # License
 
