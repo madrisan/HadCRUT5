@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="images/hadcrut5-logo.png" width="200" alt="HadCRUT5 Logo">
+</div>
+
 # Visualize the HadCRUT5 temperature datasets
 
 ![Release Status](https://img.shields.io/badge/status-stable-brightgreen.svg)
