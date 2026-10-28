@@ -50,7 +50,7 @@ def argparser(descr: str, examples: List[str]) -> argparse.ArgumentParser:
 class HadCRUT5:
     """Class for parsing and plotting HadCRUT5 datasets"""
 
-    _DATASET_VERSION = "5.1.0.0"
+    _DATASET_VERSION = "5.2.0.0"
     """current dataset version"""
 
     _DEFAULT_DATATYPE = "annual"
